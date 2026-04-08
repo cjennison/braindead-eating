@@ -13,7 +13,7 @@ import { MacroBar } from "@/components/MacroBar";
 import type { FoodLogEntry, UserProfile } from "@/types";
 
 export default function HomePage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [logs, setLogs] = useState<FoodLogEntry[]>([]);
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -29,10 +29,15 @@ export default function HomePage() {
       setLogs(await logsRes.json());
     }
     if (userRes.ok) {
-      setUser(await userRes.json());
+      const userData: UserProfile = await userRes.json();
+      if (!userData.onboardingComplete) {
+        router.push("/onboarding");
+        return;
+      }
+      setUser(userData);
     }
     setLoading(false);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -40,20 +45,9 @@ export default function HomePage() {
       return;
     }
     if (status === "authenticated") {
-      if (
-        session?.user &&
-        !(
-          session.user as unknown as {
-            onboardingComplete: boolean;
-          }
-        ).onboardingComplete
-      ) {
-        router.push("/onboarding");
-        return;
-      }
       fetchData();
     }
-  }, [status, session, router, fetchData]);
+  }, [status, router, fetchData]);
 
   const handleLogFood = async (input: string) => {
     setPendingLog(true);

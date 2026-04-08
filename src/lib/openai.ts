@@ -78,7 +78,7 @@ const FOOD_PARSE_SCHEMA = {
 
 export async function parseFood(input: string): Promise<AIResponse> {
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: input },

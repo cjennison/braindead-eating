@@ -12,7 +12,7 @@ Read `PROJECT.md` at the repo root for the full specification, including databas
 - **UI**: Mantine v7
 - **Mobile**: Capacitor (wraps the web app for iOS/Android)
 - **Database**: MongoDB Atlas with Mongoose
-- **AI**: OpenAI API (GPT-4o-mini, structured outputs)
+- **AI**: OpenAI API (GPT-5.4 nano, structured outputs)
 - **Auth**: Auth.js v5 (Google SSO only)
 - **Code Quality**: Biome (linting + formatting)
 - **Language**: TypeScript (strict mode)

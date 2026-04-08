@@ -1,7 +1,13 @@
 "use client";
 
-import { Card, Group, NumberInput, Stack, Text } from "@mantine/core";
-import { useRouter } from "next/navigation";
+import {
+  Card,
+  Group,
+  NumberInput,
+  SegmentedControl,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { OnboardingStep } from "@/components/OnboardingStep";
@@ -10,38 +16,46 @@ import {
   DEFICIT_MODES,
   type DeficitMode,
   formatNumber,
+  getWeeklyLossLabel,
+  toStoredWeight,
+  type WeightUnit,
 } from "@/types";
 
 const TOTAL_STEPS = 3;
 const DEFAULT_DEFICIT_MODE: DeficitMode = "locked-in";
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const { update } = useSession();
   const [step, setStep] = useState(1);
+  const [unit, setUnit] = useState<WeightUnit>("lbs");
   const [currentWeight, setCurrentWeight] = useState<number | string>("");
   const [goalWeight, setGoalWeight] = useState<number | string>("");
   const [selectedMode, setSelectedMode] =
     useState<DeficitMode>(DEFAULT_DEFICIT_MODE);
+  const [saving, setSaving] = useState(false);
 
   const finishOnboarding = async (overrides: Record<string, unknown> = {}) => {
-    const weight = typeof currentWeight === "number" ? currentWeight : null;
-    const goal = typeof goalWeight === "number" ? goalWeight : null;
+    setSaving(true);
+    const rawWeight = typeof currentWeight === "number" ? currentWeight : null;
+    const rawGoal = typeof goalWeight === "number" ? goalWeight : null;
+    const storedWeight = rawWeight ? toStoredWeight(rawWeight, unit) : null;
+    const storedGoal = rawGoal ? toStoredWeight(rawGoal, unit) : null;
     const mode = overrides.deficitMode ?? selectedMode;
 
     const modeOption = DEFICIT_MODES.find((m) => m.id === mode);
     const target =
-      weight && modeOption
-        ? calculateCalorieTarget(weight, modeOption.deficitPerDay)
+      storedWeight && modeOption
+        ? calculateCalorieTarget(storedWeight, modeOption.deficitPerDay)
         : null;
 
     const body: Record<string, unknown> = {
       onboardingComplete: true,
       deficitMode: mode,
+      unit,
     };
 
-    if (weight) body.currentWeight = weight;
-    if (goal) body.goalWeight = goal;
+    if (storedWeight) body.currentWeight = storedWeight;
+    if (storedGoal) body.goalWeight = storedGoal;
     if (target) body.dailyCalorieTarget = target;
 
     await fetch("/api/user", {
@@ -51,7 +65,7 @@ export default function OnboardingPage() {
     });
 
     await update();
-    router.push("/");
+    window.location.href = "/";
   };
 
   const skipAll = () => finishOnboarding({ deficitMode: DEFAULT_DEFICIT_MODE });
@@ -66,14 +80,23 @@ export default function OnboardingPage() {
         onSkip={() => setStep(2)}
         nextDisabled={typeof currentWeight !== "number" || currentWeight <= 0}
       >
+        <SegmentedControl
+          value={unit}
+          onChange={(val) => setUnit(val as WeightUnit)}
+          data={[
+            { label: "lbs", value: "lbs" },
+            { label: "kg", value: "kg" },
+          ]}
+          fullWidth
+        />
         <NumberInput
           value={currentWeight}
           onChange={setCurrentWeight}
           placeholder="Enter weight"
-          min={50}
-          max={999}
+          min={unit === "kg" ? 20 : 50}
+          max={unit === "kg" ? 450 : 999}
           decimalScale={1}
-          suffix=" lbs"
+          suffix={` ${unit}`}
           hideControls
           styles={{
             input: {
@@ -103,10 +126,10 @@ export default function OnboardingPage() {
           value={goalWeight}
           onChange={setGoalWeight}
           placeholder="Enter goal"
-          min={50}
-          max={999}
+          min={unit === "kg" ? 20 : 50}
+          max={unit === "kg" ? 450 : 999}
           decimalScale={1}
-          suffix=" lbs"
+          suffix={` ${unit}`}
           hideControls
           styles={{
             input: {
@@ -122,7 +145,10 @@ export default function OnboardingPage() {
     );
   }
 
-  const weight = typeof currentWeight === "number" ? currentWeight : 180;
+  const weight =
+    typeof currentWeight === "number"
+      ? toStoredWeight(currentWeight, unit)
+      : toStoredWeight(180, "lbs");
 
   return (
     <OnboardingStep
@@ -132,6 +158,7 @@ export default function OnboardingPage() {
       onNext={() => finishOnboarding()}
       onSkip={skipAll}
       nextLabel="Let's go"
+      loading={saving}
     >
       <Text c="dimmed" ta="center">
         Based on your numbers, here's what we recommend:
@@ -162,7 +189,12 @@ export default function OnboardingPage() {
                     {mode.subtitle}
                   </Text>
                 </div>
-                <Text fw={500}>{formatNumber(target)} cal/day</Text>
+                <div style={{ textAlign: "right" }}>
+                  <Text fw={500}>{formatNumber(target)} cal/day</Text>
+                  <Text c="dimmed" size="xs">
+                    {getWeeklyLossLabel(mode.deficitPerDay, unit)}
+                  </Text>
+                </div>
               </Group>
             </Card>
           );

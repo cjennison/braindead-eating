@@ -113,17 +113,17 @@ The tone is confident and direct without being cringe. Professional wording, not
 
 ### Framework & Platform
 
-| Layer            | Technology               | Reason                                                    |
-| ---------------- | ------------------------ | --------------------------------------------------------- |
-| **Framework**    | Next.js 15 (App Router)  | Modern React framework, SSR, API routes, Vercel-native    |
-| **UI Library**   | Mantine v7               | Clean, accessible components out of the box               |
-| **Mobile**       | Capacitor (by Ionic)     | Wraps the web app as native iOS/Android — single codebase |
-| **Deployment**   | Vercel                   | Web app hosting, serverless API routes                    |
-| **Database**     | MongoDB (Atlas)          | Flexible schema, cheap at low scale, generous free tier   |
-| **AI**           | OpenAI API (GPT-4o-mini) | Structured output for food parsing, cost-effective        |
-| **Auth**         | Auth.js v5 (NextAuth)    | Google SSO, session management                            |
-| **Code Quality** | Biome                    | Linting + formatting in one tool, fast                    |
-| **Language**     | TypeScript               | Type safety across the stack                              |
+| Layer            | Technology                | Reason                                                    |
+| ---------------- | ------------------------- | --------------------------------------------------------- |
+| **Framework**    | Next.js 15 (App Router)   | Modern React framework, SSR, API routes, Vercel-native    |
+| **UI Library**   | Mantine v7                | Clean, accessible components out of the box               |
+| **Mobile**       | Capacitor (by Ionic)      | Wraps the web app as native iOS/Android — single codebase |
+| **Deployment**   | Vercel                    | Web app hosting, serverless API routes                    |
+| **Database**     | MongoDB (Atlas)           | Flexible schema, cheap at low scale, generous free tier   |
+| **AI**           | OpenAI API (GPT-5.4 nano) | Structured output for food parsing, cost-effective        |
+| **Auth**         | Auth.js v5 (NextAuth)     | Google SSO, session management                            |
+| **Code Quality** | Biome                     | Linting + formatting in one tool, fast                    |
+| **Language**     | TypeScript                | Type safety across the stack                              |
 
 ### Why Capacitor for Mobile?
 
@@ -195,7 +195,7 @@ The limit is enforced server-side via a daily counter in MongoDB. The counter re
 
 ### Model Selection
 
-- **GPT-4o-mini** for cost efficiency — food parsing doesn't need the full model
+- **GPT-5.4 nano** for cost efficiency — food parsing doesn't need the full model
 - Structured outputs ensure consistent JSON responses
 - System prompt tuned for accurate calorie/macro estimation
 - Fallback: if AI is unavailable, show a friendly error, not a crash
