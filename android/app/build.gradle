@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.braindead.eating"
+    namespace = "com.cjennison.braindead.eating"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.braindead.eating"
+        applicationId "com.cjennison.braindead.eating"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

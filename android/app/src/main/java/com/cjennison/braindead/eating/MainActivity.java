@@ -1,4 +1,4 @@
-package com.braindead.eating;
+package com.cjennison.braindead.eating;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -3,7 +3,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const appUrl = process.env.CAPACITOR_SERVER_URL;
 
 const config: CapacitorConfig = {
-	appId: "com.braindead.eating",
+	appId: "com.cjennison.braindead-eating",
 	appName: "Brain Dead Eating",
 	webDir: "public",
 	plugins: {
