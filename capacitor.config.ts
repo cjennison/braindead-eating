@@ -9,6 +9,14 @@ const config: CapacitorConfig = {
 	server: {
 		androidScheme: "https",
 		...(appUrl ? { url: appUrl } : {}),
+		// Keep Google OAuth redirects inside WKWebView instead of
+		// opening Safari, so the session cookie stays in the app.
+		allowNavigation: [
+			"accounts.google.com",
+			"*.google.com",
+			"*.googleapis.com",
+			"*.gstatic.com",
+		],
 	},
 };
 
