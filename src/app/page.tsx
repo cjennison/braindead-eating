@@ -11,34 +11,24 @@ import { FoodInput } from "@/components/FoodInput";
 import { FoodLogItem } from "@/components/FoodLogItem";
 import { MacroBar } from "@/components/MacroBar";
 import { PageTransition } from "@/components/PageTransition";
-import type { FoodLogEntry, UserProfile } from "@/types";
+import { useUser } from "@/components/UserProvider";
+import type { FoodLogEntry } from "@/types";
 
 export default function HomePage() {
 	const { status } = useSession();
 	const router = useRouter();
+	const { user, loading: userLoading } = useUser();
 	const [logs, setLogs] = useState<FoodLogEntry[]>([]);
-	const [user, setUser] = useState<UserProfile | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [logsLoading, setLogsLoading] = useState(true);
 	const [pendingLog, setPendingLog] = useState(false);
 
-	const fetchData = useCallback(async () => {
-		const [logsRes, userRes] = await Promise.all([
-			fetch("/api/food/log"),
-			fetch("/api/user"),
-		]);
-		if (logsRes.ok) {
-			setLogs(await logsRes.json());
+	const fetchLogs = useCallback(async () => {
+		const res = await fetch("/api/food/log");
+		if (res.ok) {
+			setLogs(await res.json());
 		}
-		if (userRes.ok) {
-			const userData: UserProfile = await userRes.json();
-			if (!userData.onboardingComplete) {
-				router.push("/onboarding");
-				return;
-			}
-			setUser(userData);
-		}
-		setLoading(false);
-	}, [router]);
+		setLogsLoading(false);
+	}, []);
 
 	useEffect(() => {
 		if (status === "unauthenticated") {
@@ -46,9 +36,9 @@ export default function HomePage() {
 			return;
 		}
 		if (status === "authenticated") {
-			fetchData();
+			fetchLogs();
 		}
-	}, [status, router, fetchData]);
+	}, [status, router, fetchLogs]);
 
 	const handleLogFood = async (input: string) => {
 		setPendingLog(true);
@@ -70,7 +60,7 @@ export default function HomePage() {
 		}
 
 		setPendingLog(false);
-		await fetchData();
+		await fetchLogs();
 	};
 
 	const handleDelete = async (id: string) => {
@@ -83,20 +73,7 @@ export default function HomePage() {
 		}
 	};
 
-	if (status === "loading" || loading) {
-		return (
-			<Container
-				size={480}
-				pt="xl"
-				style={{ paddingBottom: "var(--page-bottom-padding)" }}
-			>
-				<Skeleton height={40} mb="xl" />
-				<Skeleton height={80} mb="md" />
-				<Skeleton height={120} mb="md" />
-				<Skeleton height={60} />
-			</Container>
-		);
-	}
+	const loading = status === "loading" || userLoading || logsLoading;
 
 	const target = user?.dailyCalorieTarget ?? 2000;
 	const consumed = logs.reduce((sum, log) => sum + log.totalCalories, 0);
@@ -122,95 +99,109 @@ export default function HomePage() {
 					Brain Dead Eating
 				</Title>
 
-				<CalorieDisplay remaining={remaining} target={target} />
+				{loading ? (
+					<Stack mt="md">
+						<Skeleton height={80} mb="md" />
+						<Skeleton height={120} mb="md" />
+						<Skeleton height={60} />
+					</Stack>
+				) : (
+					<>
+						<CalorieDisplay remaining={remaining} target={target} />
 
-				<div style={{ marginTop: "2rem" }}>
-					<FoodInput onSubmit={handleLogFood} />
-				</div>
+						<div style={{ marginTop: "2rem" }}>
+							<FoodInput onSubmit={handleLogFood} />
+						</div>
 
-				{logs.length === 0 && (
-					<Stack align="center" mt="4rem" gap="xs">
-						{pendingLog ? (
-							<>
-								<Text
-									c="teal.5"
-									size="xl"
-									fw={700}
-									style={{
-										fontFamily: "var(--mantine-font-family-headings)",
-										letterSpacing: "-0.01em",
-									}}
-								>
-									Thinking...
-								</Text>
-								<Text c="dimmed" size="md" ta="center">
-									Figuring out what you just ate
-								</Text>
-							</>
-						) : (
-							<>
-								<Text
-									c="dimmed"
-									size="xl"
-									fw={700}
-									style={{
-										fontFamily: "var(--mantine-font-family-headings)",
-										letterSpacing: "-0.01em",
-									}}
-								>
-									Empty stomach?
-								</Text>
-								<Text
-									c="dimmed"
-									size="md"
-									ta="center"
-									style={{ maxWidth: 300 }}
-								>
-									Type what you ate above. We'll do the math.
-								</Text>
-							</>
+						{logs.length === 0 && (
+							<Stack align="center" mt="4rem" gap="xs">
+								{pendingLog ? (
+									<>
+										<Text
+											c="teal.5"
+											size="xl"
+											fw={700}
+											style={{
+												fontFamily: "var(--mantine-font-family-headings)",
+												letterSpacing: "-0.01em",
+											}}
+										>
+											Thinking...
+										</Text>
+										<Text c="dimmed" size="md" ta="center">
+											Figuring out what you just ate
+										</Text>
+									</>
+								) : (
+									<>
+										<Text
+											c="dimmed"
+											size="xl"
+											fw={700}
+											style={{
+												fontFamily: "var(--mantine-font-family-headings)",
+												letterSpacing: "-0.01em",
+											}}
+										>
+											Empty stomach?
+										</Text>
+										<Text
+											c="dimmed"
+											size="md"
+											ta="center"
+											style={{ maxWidth: 300 }}
+										>
+											Type what you ate above. We'll do the math.
+										</Text>
+									</>
+								)}
+							</Stack>
 						)}
-					</Stack>
-				)}
 
-				{logs.length > 0 && (
-					<Stack mt="2.5rem" gap="md">
-						<Text
-							fw={700}
-							size="xl"
-							style={{
-								fontFamily: "var(--mantine-font-family-headings)",
-								letterSpacing: "0.02em",
-							}}
-						>
-							Today's Log
-						</Text>
-						{logs.map((log) => (
-							<FoodLogItem key={log._id} entry={log} onDelete={handleDelete} />
-						))}
-					</Stack>
-				)}
+						{logs.length > 0 && (
+							<Stack mt="2.5rem" gap="md">
+								<Text
+									fw={700}
+									size="xl"
+									style={{
+										fontFamily: "var(--mantine-font-family-headings)",
+										letterSpacing: "0.02em",
+									}}
+								>
+									Today's Log
+								</Text>
+								{logs.map((log) => (
+									<FoodLogItem
+										key={log._id}
+										entry={log}
+										onDelete={handleDelete}
+									/>
+								))}
+							</Stack>
+						)}
 
-				{logs.length > 0 && (
-					<div style={{ marginTop: 32 }}>
-						<MacroBar
-							protein={totalProtein}
-							carbs={totalCarbs}
-							fat={totalFat}
-						/>
-					</div>
-				)}
+						{logs.length > 0 && (
+							<div style={{ marginTop: 32 }}>
+								<MacroBar
+									protein={totalProtein}
+									carbs={totalCarbs}
+									fat={totalFat}
+								/>
+							</div>
+						)}
 
-				{logs.length > 0 && (
-					<Anchor
-						href="/history"
-						ta="center"
-						display="block"
-						mt="xl"
-						c="dimmed"
-					>
-						View past days
-					</Anchor>
+						{logs.length > 0 && (
+							<Anchor
+								href="/history"
+								ta="center"
+								display="block"
+								mt="xl"
+								c="dimmed"
+							>
+								View past days
+							</Anchor>
+						)}
+					</>
 				)}
 			</Container>
 		</PageTransition>

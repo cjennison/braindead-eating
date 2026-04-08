@@ -7,29 +7,24 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 
 import { PageTransition } from "@/components/PageTransition";
+import { useUser } from "@/components/UserProvider";
 import { WeightChart } from "@/components/WeightChart";
 import { WeightInput } from "@/components/WeightInput";
-import type { UserProfile, WeightLogEntry } from "@/types";
+import type { WeightLogEntry } from "@/types";
 
 export default function WeightPage() {
 	const { status } = useSession();
 	const router = useRouter();
+	const { user, loading: userLoading } = useUser();
 	const [entries, setEntries] = useState<WeightLogEntry[]>([]);
-	const [user, setUser] = useState<UserProfile | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [entriesLoading, setEntriesLoading] = useState(true);
 
-	const fetchData = useCallback(async () => {
-		const [weightRes, userRes] = await Promise.all([
-			fetch("/api/weight"),
-			fetch("/api/user"),
-		]);
-		if (weightRes.ok) {
-			setEntries(await weightRes.json());
+	const fetchEntries = useCallback(async () => {
+		const res = await fetch("/api/weight");
+		if (res.ok) {
+			setEntries(await res.json());
 		}
-		if (userRes.ok) {
-			setUser(await userRes.json());
-		}
-		setLoading(false);
+		setEntriesLoading(false);
 	}, []);
 
 	useEffect(() => {
@@ -38,9 +33,9 @@ export default function WeightPage() {
 			return;
 		}
 		if (status === "authenticated") {
-			fetchData();
+			fetchEntries();
 		}
-	}, [status, router, fetchData]);
+	}, [status, router, fetchEntries]);
 
 	const handleLogWeight = async (weight: number) => {
 		const res = await fetch("/api/weight", {
@@ -58,22 +53,10 @@ export default function WeightPage() {
 			return;
 		}
 
-		await fetchData();
+		await fetchEntries();
 	};
 
-	if (status === "loading" || loading) {
-		return (
-			<Container
-				size={480}
-				pt="xl"
-				style={{ paddingBottom: "var(--page-bottom-padding)" }}
-			>
-				<Skeleton height={40} mb="xl" />
-				<Skeleton height={80} mb="xl" />
-				<Skeleton height={200} />
-			</Container>
-		);
-	}
+	const loading = status === "loading" || userLoading || entriesLoading;
 
 	const unit = user?.unit ?? "lbs";
 	const latest = entries[0];
@@ -94,35 +77,44 @@ export default function WeightPage() {
 					Your Weight
 				</Title>
 
-				{latest && (
-					<Stack align="center" mb="xl">
-						<Text fw={700} style={{ fontSize: "2.5rem", lineHeight: 1.1 }}>
-							{latest.weight} {unit}
-						</Text>
-						<Text c="dimmed" size="sm">
-							logged {latest.date}
-						</Text>
+				{loading ? (
+					<Stack>
+						<Skeleton height={80} mb="xl" />
+						<Skeleton height={200} />
 					</Stack>
-				)}
-
-				<WeightInput unit={unit} onSubmit={handleLogWeight} />
-
-				{goalWeight && (
-					<Stack mt="xl" gap={4} align="center">
-						<Text c="dimmed">
-							Goal: {goalWeight} {unit}
-						</Text>
-						{toGo && (
-							<Text fw={500}>
-								To go: {toGo} {unit}
-							</Text>
+				) : (
+					<>
+						{latest && (
+							<Stack align="center" mb="xl">
+								<Text fw={700} style={{ fontSize: "2.5rem", lineHeight: 1.1 }}>
+									{latest.weight} {unit}
+								</Text>
+								<Text c="dimmed" size="sm">
+									logged {latest.date}
+								</Text>
+							</Stack>
 						)}
-					</Stack>
-				)}
 
-				<div style={{ marginTop: 32 }}>
-					<WeightChart entries={entries} unit={unit} />
-				</div>
+						<WeightInput unit={unit} onSubmit={handleLogWeight} />
+
+						{goalWeight && (
+							<Stack mt="xl" gap={4} align="center">
+								<Text c="dimmed">
+									Goal: {goalWeight} {unit}
+								</Text>
+								{toGo && (
+									<Text fw={500}>
+										To go: {toGo} {unit}
+									</Text>
+								)}
+							</Stack>
+						)}
+
+						<div style={{ marginTop: 32 }}>
+							<WeightChart entries={entries} unit={unit} />
+						</div>
+					</>
+				)}
 			</Container>
 		</PageTransition>
 	);

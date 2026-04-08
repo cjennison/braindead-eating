@@ -18,9 +18,10 @@ import {
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { PageTransition } from "@/components/PageTransition";
+import { useUser } from "@/components/UserProvider";
 import {
 	calculateCalorieTarget,
 	DEFICIT_MODES,
@@ -33,31 +34,18 @@ import {
 export default function ProfilePage() {
 	const { status } = useSession();
 	const router = useRouter();
-	const [user, setUser] = useState<UserProfile | null>(null);
-	const [loading, setLoading] = useState(true);
+	const { user, loading, updateUser: setUser } = useUser();
 	const [deleteConfirm, setDeleteConfirm] = useState(false);
 	const { setColorScheme } = useMantineColorScheme();
 	const colorScheme = useComputedColorScheme();
 
-	const fetchUser = useCallback(async () => {
-		const res = await fetch("/api/user");
-		if (res.ok) {
-			setUser(await res.json());
-		}
-		setLoading(false);
-	}, []);
-
 	useEffect(() => {
 		if (status === "unauthenticated") {
 			router.push("/auth/signin");
-			return;
 		}
-		if (status === "authenticated") {
-			fetchUser();
-		}
-	}, [status, router, fetchUser]);
+	}, [status, router]);
 
-	const updateUser = async (updates: Partial<UserProfile>) => {
+	const patchUser = async (updates: Partial<UserProfile>) => {
 		const res = await fetch("/api/user", {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
@@ -93,24 +81,11 @@ export default function ProfilePage() {
 			mode.deficitPerDay,
 			user.unit,
 		);
-		updateUser({
+		patchUser({
 			deficitMode: modeId,
 			dailyCalorieTarget: target,
 		} as Partial<UserProfile>);
 	};
-
-	if (status === "loading" || loading || !user) {
-		return (
-			<Container
-				size={480}
-				pt="xl"
-				style={{ paddingBottom: "var(--page-bottom-padding)" }}
-			>
-				<Skeleton height={40} mb="xl" />
-				<Skeleton height={200} />
-			</Container>
-		);
-	}
 
 	return (
 		<PageTransition>
@@ -123,203 +98,210 @@ export default function ProfilePage() {
 					Profile
 				</Title>
 
-				<Stack gap="lg">
-					<div>
-						<Text fw={600} size="lg">
-							{user.name}
-						</Text>
-						<Text c="dimmed" size="sm">
-							{user.email}
-						</Text>
-					</div>
-
-					<Card padding="md" radius="md" withBorder>
-						<Text c="dimmed" size="sm" mb={4}>
-							Mode
-						</Text>
-						<Text fw={600}>
-							{DEFICIT_MODES.find((m) => m.id === user.deficitMode)?.label ??
-								"Not set"}
-						</Text>
-					</Card>
-
-					<div>
-						<Text c="dimmed" size="sm" mb={4}>
-							Daily Calorie Target
-						</Text>
-						<Text fw={700} size="xl">
-							{user.dailyCalorieTarget
-								? formatNumber(user.dailyCalorieTarget)
-								: "Not set"}
-						</Text>
-					</div>
-
-					<div>
-						<Text c="dimmed" size="sm" mb={4}>
-							Intensity
-						</Text>
-						<Stack gap="xs">
-							{DEFICIT_MODES.map((mode) => (
-								<Card
-									key={mode.id}
-									padding="sm"
-									radius="md"
-									withBorder
-									onClick={() => handleDeficitChange(mode.id as DeficitMode)}
-									style={{
-										cursor: "pointer",
-										borderColor:
-											user.deficitMode === mode.id
-												? "var(--mantine-color-sage-5)"
-												: undefined,
-										borderWidth: user.deficitMode === mode.id ? 2 : 1,
-									}}
-								>
-									<Group justify="space-between">
-										<div>
-											<Text fw={600}>{mode.label}</Text>
-											<Text c="dimmed" size="sm">
-												{mode.subtitle}
-											</Text>
-										</div>
-										{user.currentWeight && (
-											<Text fw={500} size="sm">
-												{formatNumber(
-													calculateCalorieTarget(
-														user.currentWeight,
-														mode.deficitPerDay,
-														user.unit,
-													),
-												)}{" "}
-												cal
-											</Text>
-										)}
-									</Group>
-								</Card>
-							))}
-						</Stack>
-					</div>
-
-					<div>
-						<Text c="dimmed" size="sm" mb={4}>
-							Custom Calorie Target
-						</Text>
-						<NumberInput
-							value={user.dailyCalorieTarget ?? ""}
-							onChange={(val) => {
-								if (typeof val === "number" && val > 0) {
-									updateUser({
-										dailyCalorieTarget: val,
-										deficitMode: "custom",
-									} as Partial<UserProfile>);
-								}
-							}}
-							min={1200}
-							max={5000}
-							step={50}
-							hideControls
-						/>
-					</div>
-
-					<div>
-						<Text c="dimmed" size="sm" mb={4}>
-							Goal Weight
-						</Text>
-						<NumberInput
-							value={user.goalWeight ?? ""}
-							onChange={(val) => {
-								if (typeof val === "number" && val > 0) {
-									updateUser({
-										goalWeight: val,
-									} as Partial<UserProfile>);
-								}
-							}}
-							min={50}
-							max={999}
-							decimalScale={1}
-							suffix={` ${user.unit}`}
-							hideControls
-						/>
-					</div>
-
-					<div>
-						<Text c="dimmed" size="sm" mb={4}>
-							Unit Preference
-						</Text>
-						<SegmentedControl
-							value={user.unit}
-							onChange={(val) =>
-								updateUser({
-									unit: val as WeightUnit,
-								} as Partial<UserProfile>)
-							}
-							data={[
-								{ label: "lbs", value: "lbs" },
-								{ label: "kg", value: "kg" },
-							]}
-							fullWidth
-						/>
-					</div>
-
-					<div>
-						<Group justify="space-between" align="flex-end" mb={4}>
+				{status === "loading" || loading || !user ? (
+					<Stack>
+						<Skeleton height={40} mb="xl" />
+						<Skeleton height={200} />
+					</Stack>
+				) : (
+					<Stack gap="lg">
+						<div>
+							<Text fw={600} size="lg">
+								{user.name}
+							</Text>
 							<Text c="dimmed" size="sm">
-								Theme
+								{user.email}
 							</Text>
-						</Group>
-						<SegmentedControl
-							value={colorScheme}
-							onChange={(val) => setColorScheme(val as "light" | "dark")}
-							data={[
-								{ label: "Light", value: "light" },
-								{ label: "Dark", value: "dark" },
-							]}
-							fullWidth
-						/>
-					</div>
+						</div>
 
-					<Anchor href="/history" c="dimmed">
-						Food history
-					</Anchor>
-
-					<Button
-						variant="subtle"
-						color="gray"
-						onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-					>
-						Sign Out
-					</Button>
-
-					{!deleteConfirm ? (
-						<Text
-							c="coral"
-							ta="center"
-							size="sm"
-							style={{ cursor: "pointer" }}
-							onClick={() => setDeleteConfirm(true)}
-						>
-							Delete my account
-						</Text>
-					) : (
 						<Card padding="md" radius="md" withBorder>
-							<Text ta="center" mb="md" size="sm">
-								This will permanently delete your account and all your data.
-								This cannot be undone.
+							<Text c="dimmed" size="sm" mb={4}>
+								Mode
 							</Text>
-							<Group justify="center" gap="md">
-								<Button color="coral" onClick={handleDeleteAccount}>
-									Delete everything
-								</Button>
-								<Button
-									variant="default"
-									onClick={() => setDeleteConfirm(false)}
-								>
-									Never mind
-								</Button>
-							</Group>
+							<Text fw={600}>
+								{DEFICIT_MODES.find((m) => m.id === user.deficitMode)?.label ??
+									"Not set"}
+							</Text>
 						</Card>
-					)}
-				</Stack>
+
+						<div>
+							<Text c="dimmed" size="sm" mb={4}>
+								Daily Calorie Target
+							</Text>
+							<Text fw={700} size="xl">
+								{user.dailyCalorieTarget
+									? formatNumber(user.dailyCalorieTarget)
+									: "Not set"}
+							</Text>
+						</div>
+
+						<div>
+							<Text c="dimmed" size="sm" mb={4}>
+								Intensity
+							</Text>
+							<Stack gap="xs">
+								{DEFICIT_MODES.map((mode) => (
+									<Card
+										key={mode.id}
+										padding="sm"
+										radius="md"
+										withBorder
+										onClick={() => handleDeficitChange(mode.id as DeficitMode)}
+										style={{
+											cursor: "pointer",
+											borderColor:
+												user.deficitMode === mode.id
+													? "var(--mantine-color-sage-5)"
+													: undefined,
+											borderWidth: user.deficitMode === mode.id ? 2 : 1,
+										}}
+									>
+										<Group justify="space-between">
+											<div>
+												<Text fw={600}>{mode.label}</Text>
+												<Text c="dimmed" size="sm">
+													{mode.subtitle}
+												</Text>
+											</div>
+											{user.currentWeight && (
+												<Text fw={500} size="sm">
+													{formatNumber(
+														calculateCalorieTarget(
+															user.currentWeight,
+															mode.deficitPerDay,
+															user.unit,
+														),
+													)}{" "}
+													cal
+												</Text>
+											)}
+										</Group>
+									</Card>
+								))}
+							</Stack>
+						</div>
+
+						<div>
+							<Text c="dimmed" size="sm" mb={4}>
+								Custom Calorie Target
+							</Text>
+							<NumberInput
+								value={user.dailyCalorieTarget ?? ""}
+								onChange={(val) => {
+									if (typeof val === "number" && val > 0) {
+										patchUser({
+											dailyCalorieTarget: val,
+											deficitMode: "custom",
+										} as Partial<UserProfile>);
+									}
+								}}
+								min={1200}
+								max={5000}
+								step={50}
+								hideControls
+							/>
+						</div>
+
+						<div>
+							<Text c="dimmed" size="sm" mb={4}>
+								Goal Weight
+							</Text>
+							<NumberInput
+								value={user.goalWeight ?? ""}
+								onChange={(val) => {
+									if (typeof val === "number" && val > 0) {
+										patchUser({
+											goalWeight: val,
+										} as Partial<UserProfile>);
+									}
+								}}
+								min={50}
+								max={999}
+								decimalScale={1}
+								suffix={` ${user.unit}`}
+								hideControls
+							/>
+						</div>
+
+						<div>
+							<Text c="dimmed" size="sm" mb={4}>
+								Unit Preference
+							</Text>
+							<SegmentedControl
+								value={user.unit}
+								onChange={(val) =>
+									patchUser({
+										unit: val as WeightUnit,
+									} as Partial<UserProfile>)
+								}
+								data={[
+									{ label: "lbs", value: "lbs" },
+									{ label: "kg", value: "kg" },
+								]}
+								fullWidth
+							/>
+						</div>
+
+						<div>
+							<Group justify="space-between" align="flex-end" mb={4}>
+								<Text c="dimmed" size="sm">
+									Theme
+								</Text>
+							</Group>
+							<SegmentedControl
+								value={colorScheme}
+								onChange={(val) => setColorScheme(val as "light" | "dark")}
+								data={[
+									{ label: "Light", value: "light" },
+									{ label: "Dark", value: "dark" },
+								]}
+								fullWidth
+							/>
+						</div>
+
+						<Anchor href="/history" c="dimmed">
+							Food history
+						</Anchor>
+
+						<Button
+							variant="subtle"
+							color="gray"
+							onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+						>
+							Sign Out
+						</Button>
+
+						{!deleteConfirm ? (
+							<Text
+								c="coral"
+								ta="center"
+								size="sm"
+								style={{ cursor: "pointer" }}
+								onClick={() => setDeleteConfirm(true)}
+							>
+								Delete my account
+							</Text>
+						) : (
+							<Card padding="md" radius="md" withBorder>
+								<Text ta="center" mb="md" size="sm">
+									This will permanently delete your account and all your data.
+									This cannot be undone.
+								</Text>
+								<Group justify="center" gap="md">
+									<Button color="coral" onClick={handleDeleteAccount}>
+										Delete everything
+									</Button>
+									<Button
+										variant="default"
+										onClick={() => setDeleteConfirm(false)}
+									>
+										Never mind
+									</Button>
+								</Group>
+							</Card>
+						)}
+					</Stack>
+				)}
 			</Container>
 		</PageTransition>
 	);
