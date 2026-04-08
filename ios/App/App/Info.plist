@@ -52,6 +52,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>braindead-eating</string>
 				<string>com.googleusercontent.apps.344158561006-ijclh8eajb31j3irs2t8m97d315mh8ii</string>
 			</array>
 		</dict>

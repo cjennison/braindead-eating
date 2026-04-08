@@ -10,20 +10,85 @@ import {
 	Title,
 } from "@mantine/core";
 import { signIn } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PageTransition } from "@/components/PageTransition";
+
+const APP_URL = "https://braindead-eating.vercel.app";
+
+async function startNativeSignIn() {
+	const { Browser } = await import("@capacitor/browser");
+	const { App } = await import("@capacitor/app");
+
+	return new Promise<string>((resolve, reject) => {
+		let listenerHandle: { remove: () => Promise<void> } | null = null;
+
+		const timeout = setTimeout(() => {
+			cleanup();
+			reject(new Error("Sign-in timed out"));
+		}, 120_000);
+
+		const cleanup = async () => {
+			clearTimeout(timeout);
+			if (listenerHandle) {
+				await listenerHandle.remove();
+			}
+		};
+
+		App.addListener("appUrlOpen", async (event) => {
+			await cleanup();
+			try {
+				await Browser.close();
+			} catch {
+				// Browser may already be closed
+			}
+
+			const url = new URL(event.url);
+			const exchange = url.searchParams.get("exchange");
+			if (!exchange) {
+				reject(new Error("Missing exchange token"));
+				return;
+			}
+			resolve(exchange);
+		}).then((handle) => {
+			listenerHandle = handle;
+		});
+
+		const callbackPath = "/api/auth/mobile-callback";
+		const authUrl = `${APP_URL}/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackPath)}`;
+		Browser.open({ url: authUrl });
+	});
+}
 
 export default function SignInPage() {
 	const [ready, setReady] = useState(false);
 	const [signingIn, setSigningIn] = useState(false);
+	const [isNative, setIsNative] = useState(false);
+	const signingInRef = useRef(false);
 
 	useEffect(() => {
+		import("@capacitor/core").then(({ Capacitor }) => {
+			setIsNative(Capacitor.isNativePlatform());
+		});
 		setReady(true);
 	}, []);
 
-	const handleSignIn = () => {
+	const handleSignIn = async () => {
+		if (signingInRef.current) return;
+		signingInRef.current = true;
 		setSigningIn(true);
-		signIn("google", { callbackUrl: "/" });
+
+		if (isNative) {
+			try {
+				const exchange = await startNativeSignIn();
+				const encoded = encodeURIComponent(exchange);
+				window.location.href = `${APP_URL}/api/auth/exchange?exchange=${encoded}`;
+			} catch {
+				setSigningIn(false);
+				signingInRef.current = false;
+			}
+		} else {
+			signIn("google", { callbackUrl: "/" });
+		}
 	};
 
 	return (
