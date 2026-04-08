@@ -9,55 +9,19 @@ import {
 	Text,
 	Title,
 } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { PageTransition } from "@/components/PageTransition";
 
-const isNative = typeof window !== "undefined" && "Capacitor" in window;
-
 export default function SignInPage() {
 	const [ready, setReady] = useState(false);
 	const [signingIn, setSigningIn] = useState(false);
-	const router = useRouter();
 
 	useEffect(() => {
 		setReady(true);
 	}, []);
 
-	const handleNativeSignIn = async () => {
-		setSigningIn(true);
-		try {
-			const { GoogleAuth } = await import("@southdevs/capacitor-google-auth");
-			await GoogleAuth.initialize();
-			const result = await GoogleAuth.signIn({
-				scopes: ["email", "profile"],
-			});
-			const idToken = result.authentication.idToken;
-
-			const res = await fetch("/api/auth/native-google", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ idToken }),
-			});
-
-			if (!res.ok) {
-				throw new Error("Failed to create session");
-			}
-
-			router.push("/");
-		} catch {
-			notifications.show({
-				title: "Sign in failed",
-				message: "Something went wrong. Try again.",
-				color: "coral",
-			});
-			setSigningIn(false);
-		}
-	};
-
-	const handleWebSignIn = () => {
+	const handleSignIn = () => {
 		setSigningIn(true);
 		signIn("google", { callbackUrl: "/" });
 	};
@@ -76,7 +40,7 @@ export default function SignInPage() {
 						{ready ? (
 							<Button
 								size="xl"
-								onClick={isNative ? handleNativeSignIn : handleWebSignIn}
+								onClick={handleSignIn}
 								fullWidth
 								maw={320}
 								loading={signingIn}
