@@ -4,7 +4,15 @@ import { connectDB } from "@/lib/db";
 import { User } from "@/lib/models/User";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-	providers: [Google],
+	providers: [
+		Google({
+			// WKWebView (Capacitor iOS) drops the PKCE code_verifier cookie
+			// during the cross-site OAuth redirect chain, causing InvalidCheck.
+			// Server-side code exchange with client secret already prevents
+			// code interception, making PKCE redundant here.
+			checks: ["none"],
+		}),
+	],
 	session: {
 		strategy: "jwt",
 		maxAge: 30 * 24 * 60 * 60, // 30 days
