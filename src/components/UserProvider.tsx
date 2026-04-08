@@ -24,7 +24,9 @@ interface AppDataContextValue {
 	foodLogs: FoodLogEntry[];
 	foodLogsLoading: boolean;
 	refreshFoodLogs: () => Promise<void>;
-	setFoodLogs: (updater: FoodLogEntry[] | ((prev: FoodLogEntry[]) => FoodLogEntry[])) => void;
+	setFoodLogs: (
+		updater: FoodLogEntry[] | ((prev: FoodLogEntry[]) => FoodLogEntry[]),
+	) => void;
 
 	weightEntries: WeightLogEntry[];
 	weightEntriesLoading: boolean;

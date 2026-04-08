@@ -6,9 +6,14 @@ const config: CapacitorConfig = {
 	appId: "com.braindead.eating",
 	appName: "Brain Dead Eating",
 	webDir: "public",
-	ios: {
-		overrideUserAgent:
-			"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+	plugins: {
+		GoogleAuth: {
+			iosClientId:
+				"344158561006-ijclh8eajb31j3irs2t8m97d315mh8ii.apps.googleusercontent.com",
+			serverClientId:
+				"344158561006-l4gs9f78kg8617a6ddht1hpfi4qua3rb.apps.googleusercontent.com",
+			scopes: ["email", "profile"],
+		},
 	},
 	server: {
 		androidScheme: "https",

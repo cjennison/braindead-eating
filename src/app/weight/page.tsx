@@ -15,7 +15,11 @@ export default function WeightPage() {
 	const { status } = useSession();
 	const router = useRouter();
 	const { user, loading: userLoading } = useUser();
-	const { entries, loading: entriesLoading, refreshEntries } = useWeightEntries();
+	const {
+		entries,
+		loading: entriesLoading,
+		refreshEntries,
+	} = useWeightEntries();
 
 	useEffect(() => {
 		if (status === "unauthenticated") {
