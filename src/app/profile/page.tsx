@@ -16,6 +16,7 @@ import {
 	useMantineColorScheme,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -106,6 +107,18 @@ export default function ProfilePage() {
 					</Stack>
 				) : (
 					<Stack gap="lg">
+						{user.subscriptionTier === "admin" && (
+							<Button
+								component={Link}
+								href="/admin"
+								variant="light"
+								color="grape"
+								fullWidth
+							>
+								Admin Dashboard
+							</Button>
+						)}
+
 						<div>
 							<Text fw={600} size="lg">
 								{user.name}
