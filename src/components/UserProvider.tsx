@@ -11,67 +11,191 @@ import {
 	useRef,
 	useState,
 } from "react";
-import type { UserProfile } from "@/types";
+import type { FoodLogEntry, UserProfile, WeightLogEntry } from "@/types";
 
-interface UserContextValue {
+const STALE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
+
+interface AppDataContextValue {
 	user: UserProfile | null;
-	loading: boolean;
+	userLoading: boolean;
 	refreshUser: () => Promise<void>;
 	updateUser: (updated: UserProfile) => void;
+
+	foodLogs: FoodLogEntry[];
+	foodLogsLoading: boolean;
+	refreshFoodLogs: () => Promise<void>;
+	setFoodLogs: (updater: FoodLogEntry[] | ((prev: FoodLogEntry[]) => FoodLogEntry[])) => void;
+
+	weightEntries: WeightLogEntry[];
+	weightEntriesLoading: boolean;
+	refreshWeightEntries: () => Promise<void>;
 }
 
-const UserContext = createContext<UserContextValue>({
+const AppDataContext = createContext<AppDataContextValue>({
 	user: null,
-	loading: true,
+	userLoading: true,
 	refreshUser: async () => {},
 	updateUser: () => {},
+
+	foodLogs: [],
+	foodLogsLoading: true,
+	refreshFoodLogs: async () => {},
+	setFoodLogs: () => {},
+
+	weightEntries: [],
+	weightEntriesLoading: true,
+	refreshWeightEntries: async () => {},
 });
 
 export function useUser() {
-	return useContext(UserContext);
+	const ctx = useContext(AppDataContext);
+	return {
+		user: ctx.user,
+		loading: ctx.userLoading,
+		refreshUser: ctx.refreshUser,
+		updateUser: ctx.updateUser,
+	};
+}
+
+export function useFoodLogs() {
+	const ctx = useContext(AppDataContext);
+	return {
+		logs: ctx.foodLogs,
+		loading: ctx.foodLogsLoading,
+		refreshLogs: ctx.refreshFoodLogs,
+		setLogs: ctx.setFoodLogs,
+	};
+}
+
+export function useWeightEntries() {
+	const ctx = useContext(AppDataContext);
+	return {
+		entries: ctx.weightEntries,
+		loading: ctx.weightEntriesLoading,
+		refreshEntries: ctx.refreshWeightEntries,
+	};
+}
+
+function isStale(timestamp: number | null): boolean {
+	if (timestamp === null) return true;
+	return Date.now() - timestamp > STALE_THRESHOLD_MS;
 }
 
 export function UserProvider({ children }: { children: ReactNode }) {
 	const { status } = useSession();
 	const router = useRouter();
+
+	// User state
 	const [user, setUser] = useState<UserProfile | null>(null);
-	const [loading, setLoading] = useState(true);
-	const fetchedRef = useRef(false);
+	const [userLoading, setUserLoading] = useState(true);
+	const userFetchedAt = useRef<number | null>(null);
+
+	// Food logs state
+	const [foodLogs, setFoodLogs] = useState<FoodLogEntry[]>([]);
+	const [foodLogsLoading, setFoodLogsLoading] = useState(true);
+	const foodLogsFetchedAt = useRef<number | null>(null);
+
+	// Weight entries state
+	const [weightEntries, setWeightEntries] = useState<WeightLogEntry[]>([]);
+	const [weightEntriesLoading, setWeightEntriesLoading] = useState(true);
+	const weightFetchedAt = useRef<number | null>(null);
 
 	const fetchUser = useCallback(async () => {
 		const res = await fetch("/api/user");
 		if (res.ok) {
 			const data: UserProfile = await res.json();
 			setUser(data);
+			userFetchedAt.current = Date.now();
 			if (!data.onboardingComplete) {
 				router.push("/onboarding");
 			}
 		}
-		setLoading(false);
+		setUserLoading(false);
 	}, [router]);
 
+	const fetchFoodLogs = useCallback(async () => {
+		const res = await fetch("/api/food/log");
+		if (res.ok) {
+			setFoodLogs(await res.json());
+			foodLogsFetchedAt.current = Date.now();
+		}
+		setFoodLogsLoading(false);
+	}, []);
+
+	const fetchWeightEntries = useCallback(async () => {
+		const res = await fetch("/api/weight");
+		if (res.ok) {
+			setWeightEntries(await res.json());
+			weightFetchedAt.current = Date.now();
+		}
+		setWeightEntriesLoading(false);
+	}, []);
+
+	// Initial fetch on auth
 	useEffect(() => {
 		if (status === "unauthenticated") {
-			setLoading(false);
+			setUserLoading(false);
+			setFoodLogsLoading(false);
+			setWeightEntriesLoading(false);
 			return;
 		}
-		if (status === "authenticated" && !fetchedRef.current) {
-			fetchedRef.current = true;
+		if (status === "authenticated" && userFetchedAt.current === null) {
 			fetchUser();
+			fetchFoodLogs();
+			fetchWeightEntries();
 		}
-	}, [status, fetchUser]);
+	}, [status, fetchUser, fetchFoodLogs, fetchWeightEntries]);
 
+	// Refresh functions: only show loading if data is stale
 	const refreshUser = useCallback(async () => {
+		if (isStale(userFetchedAt.current)) {
+			setUserLoading(true);
+		}
 		await fetchUser();
 	}, [fetchUser]);
+
+	const refreshFoodLogs = useCallback(async () => {
+		if (isStale(foodLogsFetchedAt.current)) {
+			setFoodLogsLoading(true);
+		}
+		await fetchFoodLogs();
+	}, [fetchFoodLogs]);
+
+	const refreshWeightEntries = useCallback(async () => {
+		if (isStale(weightFetchedAt.current)) {
+			setWeightEntriesLoading(true);
+		}
+		await fetchWeightEntries();
+	}, [fetchWeightEntries]);
 
 	const updateUser = useCallback((updated: UserProfile) => {
 		setUser(updated);
 	}, []);
 
+	const setFoodLogsWrapper = useCallback(
+		(updater: FoodLogEntry[] | ((prev: FoodLogEntry[]) => FoodLogEntry[])) => {
+			setFoodLogs(updater);
+		},
+		[],
+	);
+
 	return (
-		<UserContext.Provider value={{ user, loading, refreshUser, updateUser }}>
+		<AppDataContext.Provider
+			value={{
+				user,
+				userLoading,
+				refreshUser,
+				updateUser,
+				foodLogs,
+				foodLogsLoading,
+				refreshFoodLogs,
+				setFoodLogs: setFoodLogsWrapper,
+				weightEntries,
+				weightEntriesLoading,
+				refreshWeightEntries,
+			}}
+		>
 			{children}
-		</UserContext.Provider>
+		</AppDataContext.Provider>
 	);
 }

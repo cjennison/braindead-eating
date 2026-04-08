@@ -4,41 +4,28 @@ import { Anchor, Container, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { CalorieDisplay } from "@/components/CalorieDisplay";
 import { FoodInput } from "@/components/FoodInput";
 import { FoodLogItem } from "@/components/FoodLogItem";
 import { MacroBar } from "@/components/MacroBar";
 import { PageTransition } from "@/components/PageTransition";
-import { useUser } from "@/components/UserProvider";
+import { useFoodLogs, useUser } from "@/components/UserProvider";
 import type { FoodLogEntry } from "@/types";
 
 export default function HomePage() {
 	const { status } = useSession();
 	const router = useRouter();
 	const { user, loading: userLoading } = useUser();
-	const [logs, setLogs] = useState<FoodLogEntry[]>([]);
-	const [logsLoading, setLogsLoading] = useState(true);
+	const { logs, loading: logsLoading, refreshLogs, setLogs } = useFoodLogs();
 	const [pendingLog, setPendingLog] = useState(false);
-
-	const fetchLogs = useCallback(async () => {
-		const res = await fetch("/api/food/log");
-		if (res.ok) {
-			setLogs(await res.json());
-		}
-		setLogsLoading(false);
-	}, []);
 
 	useEffect(() => {
 		if (status === "unauthenticated") {
 			router.push("/auth/signin");
-			return;
 		}
-		if (status === "authenticated") {
-			fetchLogs();
-		}
-	}, [status, router, fetchLogs]);
+	}, [status, router]);
 
 	const handleLogFood = async (input: string) => {
 		setPendingLog(true);
@@ -60,7 +47,7 @@ export default function HomePage() {
 		}
 
 		setPendingLog(false);
-		await fetchLogs();
+		await refreshLogs();
 	};
 
 	const handleDelete = async (id: string) => {
@@ -69,7 +56,7 @@ export default function HomePage() {
 		});
 
 		if (res.ok) {
-			setLogs((prev) => prev.filter((l) => l._id !== id));
+			setLogs((prev: FoodLogEntry[]) => prev.filter((l) => l._id !== id));
 		}
 	};
 

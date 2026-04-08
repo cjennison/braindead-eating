@@ -4,38 +4,24 @@ import { Container, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { PageTransition } from "@/components/PageTransition";
-import { useUser } from "@/components/UserProvider";
+import { useUser, useWeightEntries } from "@/components/UserProvider";
 import { WeightChart } from "@/components/WeightChart";
 import { WeightInput } from "@/components/WeightInput";
-import type { WeightLogEntry } from "@/types";
 
 export default function WeightPage() {
 	const { status } = useSession();
 	const router = useRouter();
 	const { user, loading: userLoading } = useUser();
-	const [entries, setEntries] = useState<WeightLogEntry[]>([]);
-	const [entriesLoading, setEntriesLoading] = useState(true);
-
-	const fetchEntries = useCallback(async () => {
-		const res = await fetch("/api/weight");
-		if (res.ok) {
-			setEntries(await res.json());
-		}
-		setEntriesLoading(false);
-	}, []);
+	const { entries, loading: entriesLoading, refreshEntries } = useWeightEntries();
 
 	useEffect(() => {
 		if (status === "unauthenticated") {
 			router.push("/auth/signin");
-			return;
 		}
-		if (status === "authenticated") {
-			fetchEntries();
-		}
-	}, [status, router, fetchEntries]);
+	}, [status, router]);
 
 	const handleLogWeight = async (weight: number) => {
 		const res = await fetch("/api/weight", {
@@ -53,7 +39,7 @@ export default function WeightPage() {
 			return;
 		}
 
-		await fetchEntries();
+		await refreshEntries();
 	};
 
 	const loading = status === "loading" || userLoading || entriesLoading;
