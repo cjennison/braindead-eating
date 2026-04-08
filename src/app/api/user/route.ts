@@ -31,7 +31,13 @@ export async function GET() {
 		return NextResponse.json({ error: "User not found" }, { status: 404 });
 	}
 
-	return NextResponse.json(user);
+	return NextResponse.json({
+		...user,
+		subscriptionTier: user.subscriptionTier ?? "free",
+		subscriptionExpiresAt: user.subscriptionExpiresAt ?? null,
+		subscriptionSource: user.subscriptionSource ?? null,
+		trialUsed: user.trialUsed ?? false,
+	});
 }
 
 export async function PATCH(request: Request) {

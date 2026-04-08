@@ -38,3 +38,5 @@ android/app/build/
 
 # Vercel
 .vercel
+
+scripts/

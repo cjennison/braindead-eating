@@ -21,6 +21,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 import { PageTransition } from "@/components/PageTransition";
+import { SubscriptionCard } from "@/components/SubscriptionCard";
 import { useUser } from "@/components/UserProvider";
 import {
 	calculateCalorieTarget,
@@ -123,6 +124,8 @@ export default function ProfilePage() {
 									"Not set"}
 							</Text>
 						</Card>
+
+						<SubscriptionCard user={user} onUpdate={setUser} />
 
 						<div>
 							<Text c="dimmed" size="sm" mb={4}>

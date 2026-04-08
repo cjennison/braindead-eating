@@ -23,6 +23,7 @@ interface AppDataContextValue {
 
 	foodLogs: FoodLogEntry[];
 	foodLogsLoading: boolean;
+	aiUsageCount: number;
 	refreshFoodLogs: () => Promise<void>;
 	setFoodLogs: (
 		updater: FoodLogEntry[] | ((prev: FoodLogEntry[]) => FoodLogEntry[]),
@@ -41,6 +42,7 @@ const AppDataContext = createContext<AppDataContextValue>({
 
 	foodLogs: [],
 	foodLogsLoading: true,
+	aiUsageCount: 0,
 	refreshFoodLogs: async () => {},
 	setFoodLogs: () => {},
 
@@ -64,6 +66,7 @@ export function useFoodLogs() {
 	return {
 		logs: ctx.foodLogs,
 		loading: ctx.foodLogsLoading,
+		aiUsageCount: ctx.aiUsageCount,
 		refreshLogs: ctx.refreshFoodLogs,
 		setLogs: ctx.setFoodLogs,
 	};
@@ -95,6 +98,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 	// Food logs state
 	const [foodLogs, setFoodLogs] = useState<FoodLogEntry[]>([]);
 	const [foodLogsLoading, setFoodLogsLoading] = useState(true);
+	const [aiUsageCount, setAiUsageCount] = useState(0);
 	const foodLogsFetchedAt = useRef<number | null>(null);
 
 	// Weight entries state
@@ -118,7 +122,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
 	const fetchFoodLogs = useCallback(async () => {
 		const res = await fetch("/api/food/log");
 		if (res.ok) {
-			setFoodLogs(await res.json());
+			const data = (await res.json()) as {
+				logs: FoodLogEntry[];
+				aiUsageCount: number;
+			};
+			setFoodLogs(data.logs);
+			setAiUsageCount(data.aiUsageCount);
 			foodLogsFetchedAt.current = Date.now();
 		}
 		setFoodLogsLoading(false);
@@ -190,6 +199,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 				updateUser,
 				foodLogs,
 				foodLogsLoading,
+				aiUsageCount,
 				refreshFoodLogs,
 				setFoodLogs: setFoodLogsWrapper,
 				weightEntries,

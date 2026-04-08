@@ -1,5 +1,10 @@
 import mongoose, { type Document, Schema } from "mongoose";
-import type { DeficitMode, WeightUnit } from "@/types";
+import type {
+	DeficitMode,
+	SubscriptionSource,
+	SubscriptionTier,
+	WeightUnit,
+} from "@/types";
 
 export interface IUser extends Document {
 	email: string;
@@ -12,6 +17,10 @@ export interface IUser extends Document {
 	unit: WeightUnit;
 	timezone: string;
 	onboardingComplete: boolean;
+	subscriptionTier: SubscriptionTier;
+	subscriptionExpiresAt: Date | null;
+	subscriptionSource: SubscriptionSource;
+	trialUsed: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -36,6 +45,18 @@ const userSchema = new Schema<IUser>(
 		},
 		timezone: { type: String, default: "UTC" },
 		onboardingComplete: { type: Boolean, default: false },
+		subscriptionTier: {
+			type: String,
+			enum: ["free", "pro", "admin"],
+			default: "free",
+		},
+		subscriptionExpiresAt: { type: Date, default: null },
+		subscriptionSource: {
+			type: String,
+			enum: ["trial", "promo", "apple", "google", null],
+			default: null,
+		},
+		trialUsed: { type: Boolean, default: false },
 	},
 	{
 		timestamps: true,

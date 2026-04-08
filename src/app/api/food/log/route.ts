@@ -6,7 +6,7 @@ import { AiUsage } from "@/lib/models/AiUsage";
 import { FoodLog } from "@/lib/models/FoodLog";
 import { User } from "@/lib/models/User";
 import { parseFood } from "@/lib/openai";
-import { AI_DAILY_LIMIT } from "@/types";
+import { getAiDailyLimit, getEffectiveTier, INPUT_MAX_LENGTH } from "@/types";
 
 export async function POST(request: Request) {
 	const session = await auth();
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 	}
 
 	const trimmed = input.trim();
-	if (trimmed.length > 500) {
+	if (trimmed.length > INPUT_MAX_LENGTH) {
 		return NextResponse.json(
 			{ error: "Keep it shorter. Just list what you ate." },
 			{ status: 400 },
@@ -39,21 +39,43 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "User not found" }, { status: 404 });
 	}
 
-	const typedUser = user as unknown as { timezone: string };
-	const today = getTodayForTimezone(typedUser.timezone || "UTC");
+	const typedUser = {
+		timezone: (user as Record<string, unknown>).timezone ?? "UTC",
+		subscriptionTier:
+			(user as Record<string, unknown>).subscriptionTier ?? "free",
+		subscriptionExpiresAt:
+			(user as Record<string, unknown>).subscriptionExpiresAt ?? null,
+	} as {
+		timezone: string;
+		subscriptionTier: "free" | "pro" | "admin";
+		subscriptionExpiresAt: Date | null;
+	};
+	const today = getTodayForTimezone(typedUser.timezone);
 
-	const usage = await AiUsage.findOne({
-		userId: session.user.id,
-		date: today,
+	const effectiveTier = getEffectiveTier({
+		subscriptionTier: typedUser.subscriptionTier,
+		subscriptionExpiresAt: typedUser.subscriptionExpiresAt,
 	});
 
-	if (usage && usage.count >= AI_DAILY_LIMIT) {
-		return NextResponse.json(
-			{
-				error: "You've logged all your meals for today. Resets at midnight.",
-			},
-			{ status: 429 },
-		);
+	const dailyLimit = getAiDailyLimit(effectiveTier);
+
+	if (dailyLimit !== null) {
+		const usage = await AiUsage.findOne({
+			userId: session.user.id,
+			date: today,
+		});
+
+		if (usage && usage.count >= dailyLimit) {
+			return NextResponse.json(
+				{
+					error:
+						effectiveTier === "free"
+							? "You've used all 5 logs for today. Upgrade to Pro for 25 per day, or wait until midnight."
+							: "You've logged all your meals for today. Resets at midnight.",
+				},
+				{ status: 429 },
+			);
+		}
 	}
 
 	await AiUsage.findOneAndUpdate(
@@ -99,12 +121,21 @@ export async function GET(request: Request) {
 		date = getTodayForTimezone(typedUser?.timezone || "UTC");
 	}
 
-	const logs = await FoodLog.find({
-		userId: session.user.id,
-		date,
-	})
-		.sort({ createdAt: -1 })
-		.lean();
+	const [logs, usage] = await Promise.all([
+		FoodLog.find({
+			userId: session.user.id,
+			date,
+		})
+			.sort({ createdAt: -1 })
+			.lean(),
+		AiUsage.findOne({
+			userId: session.user.id,
+			date,
+		}).lean(),
+	]);
 
-	return NextResponse.json(logs);
+	return NextResponse.json({
+		logs,
+		aiUsageCount: (usage as { count: number } | null)?.count ?? 0,
+	});
 }

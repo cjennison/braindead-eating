@@ -6,6 +6,9 @@ export interface FoodItem {
 	fat_g: number;
 }
 
+export type SubscriptionTier = "free" | "pro" | "admin";
+export type SubscriptionSource = "trial" | "promo" | "apple" | "google" | null;
+
 export interface FoodLogEntry {
 	_id: string;
 	userId: string;
@@ -48,6 +51,10 @@ export interface UserProfile {
 	unit: WeightUnit;
 	timezone: string;
 	onboardingComplete: boolean;
+	subscriptionTier: SubscriptionTier;
+	subscriptionExpiresAt: string | null;
+	subscriptionSource: SubscriptionSource;
+	trialUsed: boolean;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -122,7 +129,9 @@ const CALORIE_ROUND_TO = 5;
 const CLOSE_THRESHOLD = 0.15;
 const LBS_PER_KG = 2.20462;
 
-export const AI_DAILY_LIMIT = 5;
+export const AI_DAILY_LIMIT_FREE = 5;
+export const AI_DAILY_LIMIT_PRO = 25;
+export const INPUT_MAX_LENGTH = 500;
 
 export const MIN_CALORIES_PER_DAY = 1200;
 export const MAX_CALORIES_PER_DAY = 5000;
@@ -206,4 +215,31 @@ export function getWeeklyLossLabel(
 		return `~${kgPerWeek.toFixed(1)} kg/week`;
 	}
 	return `~${lbsPerWeek.toFixed(1)} lb/week`;
+}
+
+/**
+ * Computes the effective subscription tier for a user.
+ * If their subscription has expired, they're treated as free.
+ * Admin never expires.
+ */
+export function getEffectiveTier(user: {
+	subscriptionTier: SubscriptionTier;
+	subscriptionExpiresAt: string | Date | null;
+}): SubscriptionTier {
+	if (user.subscriptionTier === "admin") return "admin";
+	if (user.subscriptionTier === "free") return "free";
+	// Null expiry on a paid tier = indefinite (promo with no duration)
+	if (!user.subscriptionExpiresAt) return user.subscriptionTier;
+	const expires = new Date(user.subscriptionExpiresAt);
+	if (expires <= new Date()) return "free";
+	return user.subscriptionTier;
+}
+
+/**
+ * Returns the AI daily limit for a given tier.
+ */
+export function getAiDailyLimit(tier: SubscriptionTier): number | null {
+	if (tier === "admin") return null; // unlimited
+	if (tier === "pro") return AI_DAILY_LIMIT_PRO;
+	return AI_DAILY_LIMIT_FREE;
 }

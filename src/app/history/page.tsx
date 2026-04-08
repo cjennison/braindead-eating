@@ -58,7 +58,11 @@ export default function HistoryPage() {
 		for (const date of pastDays) {
 			const res = await fetch(`/api/food/log?date=${encodeURIComponent(date)}`);
 			if (res.ok) {
-				const logs: FoodLogEntry[] = await res.json();
+				const data = (await res.json()) as {
+					logs: FoodLogEntry[];
+					aiUsageCount: number;
+				};
+				const logs = data.logs;
 				if (logs.length > 0) {
 					const totalCalories = logs.reduce(
 						(sum, l) => sum + l.totalCalories,

@@ -12,13 +12,19 @@ import { FoodLogItem } from "@/components/FoodLogItem";
 import { MacroBar } from "@/components/MacroBar";
 import { PageTransition } from "@/components/PageTransition";
 import { useFoodLogs, useUser } from "@/components/UserProvider";
-import type { FoodLogEntry } from "@/types";
+import { type FoodLogEntry, getAiDailyLimit, getEffectiveTier } from "@/types";
 
 export default function HomePage() {
 	const { status } = useSession();
 	const router = useRouter();
 	const { user, loading: userLoading } = useUser();
-	const { logs, loading: logsLoading, refreshLogs, setLogs } = useFoodLogs();
+	const {
+		logs,
+		loading: logsLoading,
+		aiUsageCount,
+		refreshLogs,
+		setLogs,
+	} = useFoodLogs();
 	const [pendingLog, setPendingLog] = useState(false);
 
 	useEffect(() => {
@@ -70,6 +76,14 @@ export default function HomePage() {
 	const totalCarbs = logs.reduce((sum, log) => sum + log.totalCarbs_g, 0);
 	const totalFat = logs.reduce((sum, log) => sum + log.totalFat_g, 0);
 
+	const effectiveTier = user
+		? getEffectiveTier({
+				subscriptionTier: user.subscriptionTier,
+				subscriptionExpiresAt: user.subscriptionExpiresAt,
+			})
+		: "free";
+	const dailyLimit = getAiDailyLimit(effectiveTier);
+
 	return (
 		<PageTransition>
 			<Container
@@ -98,6 +112,14 @@ export default function HomePage() {
 
 						<div style={{ marginTop: "2rem" }}>
 							<FoodInput onSubmit={handleLogFood} />
+							{dailyLimit !== null && (
+								<Text size="xs" c="dimmed" ta="center" mt="xs">
+									{dailyLimit - aiUsageCount > 0
+										? `${dailyLimit - aiUsageCount} logs remaining today`
+										: "No logs remaining today"}
+									{effectiveTier === "free" && " (free plan)"}
+								</Text>
+							)}
 						</div>
 
 						{logs.length === 0 && (

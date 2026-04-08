@@ -1,8 +1,8 @@
 "use client";
 
-import { Button, Textarea } from "@mantine/core";
+import { Button, Text, Textarea } from "@mantine/core";
 import { useState } from "react";
-import { getRandomPlaceholder } from "@/types";
+import { getRandomPlaceholder, INPUT_MAX_LENGTH } from "@/types";
 
 interface FoodInputProps {
 	onSubmit: (input: string) => Promise<void>;
@@ -14,9 +14,11 @@ export function FoodInput({ onSubmit, disabled }: FoodInputProps) {
 	const [loading, setLoading] = useState(false);
 	const [placeholder] = useState(() => getRandomPlaceholder());
 
+	const trimmed = value.trim();
+	const overLimit = trimmed.length > INPUT_MAX_LENGTH;
+
 	const handleSubmit = async () => {
-		const trimmed = value.trim();
-		if (!trimmed || loading) return;
+		if (!trimmed || loading || overLimit) return;
 
 		setLoading(true);
 		await onSubmit(trimmed);
@@ -60,6 +62,11 @@ export function FoodInput({ onSubmit, disabled }: FoodInputProps) {
 					}
 				}}
 			/>
+			{trimmed.length > 0 && (
+				<Text size="xs" c={overLimit ? "coral" : "dimmed"} ta="right" mt={4}>
+					{trimmed.length}/{INPUT_MAX_LENGTH}
+				</Text>
+			)}
 			<Button
 				fullWidth
 				mt="lg"
@@ -68,7 +75,7 @@ export function FoodInput({ onSubmit, disabled }: FoodInputProps) {
 				color="teal"
 				onClick={handleSubmit}
 				loading={loading}
-				disabled={!value.trim() || disabled}
+				disabled={!trimmed || disabled || overLimit}
 				loaderProps={{ type: "dots" }}
 				style={{
 					height: "3.5rem",
@@ -76,7 +83,7 @@ export function FoodInput({ onSubmit, disabled }: FoodInputProps) {
 					fontFamily: "var(--mantine-font-family-headings)",
 					letterSpacing: "0.02em",
 					boxShadow:
-						value.trim() && !disabled && !loading
+						trimmed && !disabled && !loading && !overLimit
 							? "0 4px 14px 0 rgba(45, 212, 191, 0.39)"
 							: "none",
 				}}
