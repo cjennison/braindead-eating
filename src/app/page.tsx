@@ -179,11 +179,17 @@ export default function HomePage() {
 								>
 									Today's Log
 								</Text>
+								{(effectiveTier === "pro" || effectiveTier === "admin") && (
+									<Text size="xs" c="dimmed">
+										tap an item to check the macros
+									</Text>
+								)}
 								{logs.map((log) => (
 									<FoodLogItem
 										key={log._id}
 										entry={log}
 										onDelete={handleDelete}
+										tier={effectiveTier}
 									/>
 								))}
 							</Stack>
@@ -210,6 +216,16 @@ export default function HomePage() {
 								View past days
 							</Anchor>
 						)}
+
+						<Text
+							size="xs"
+							c="dimmed"
+							ta="center"
+							mt="xl"
+							style={{ opacity: 0.6 }}
+						>
+							Estimates powered by AI. Nutritional values are approximate.
+						</Text>
 					</>
 				)}
 			</Container>
