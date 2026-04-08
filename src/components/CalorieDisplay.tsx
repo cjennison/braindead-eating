@@ -10,7 +10,7 @@ interface CalorieDisplayProps {
 
 const STATUS_COLORS = {
 	"on-track": "var(--mantine-color-sage-5)",
-	close: "#D4A843",
+	close: "var(--mantine-color-yellow-6)",
 	over: "var(--mantine-color-coral-5)",
 } as const;
 

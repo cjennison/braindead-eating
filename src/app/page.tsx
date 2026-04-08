@@ -10,6 +10,7 @@ import { CalorieDisplay } from "@/components/CalorieDisplay";
 import { FoodInput } from "@/components/FoodInput";
 import { FoodLogItem } from "@/components/FoodLogItem";
 import { MacroBar } from "@/components/MacroBar";
+import { PageTransition } from "@/components/PageTransition";
 import type { FoodLogEntry, UserProfile } from "@/types";
 
 export default function HomePage() {
@@ -102,93 +103,114 @@ export default function HomePage() {
 	const totalFat = logs.reduce((sum, log) => sum + log.totalFat_g, 0);
 
 	return (
-		<Container size={480} py="md" pb={100}>
-			<Title
-				order={3}
-				mb="xs"
-				c="darkCharcoal.3"
-				style={{ letterSpacing: "-0.02em" }}
+		<PageTransition>
+			<Container
+				size={480}
+				py="md"
+				style={{ paddingBottom: "var(--page-bottom-padding)" }}
 			>
-				Brain Dead Eating
-			</Title>
+				<Title
+					order={3}
+					mb="xs"
+					c="darkCharcoal.3"
+					style={{ letterSpacing: "-0.02em" }}
+				>
+					Brain Dead Eating
+				</Title>
 
-			<CalorieDisplay remaining={remaining} target={target} />
+				<CalorieDisplay remaining={remaining} target={target} />
 
-			<div style={{ marginTop: "2rem" }}>
-				<FoodInput onSubmit={handleLogFood} />
-			</div>
-
-			{logs.length === 0 && (
-				<Stack align="center" mt="4rem" gap="xs">
-					{pendingLog ? (
-						<>
-							<Text
-								c="teal.5"
-								size="xl"
-								fw={700}
-								style={{
-									fontFamily: "var(--mantine-font-family-headings)",
-									letterSpacing: "-0.01em",
-								}}
-							>
-								Thinking...
-							</Text>
-							<Text c="dimmed" size="md" ta="center">
-								Figuring out what you just ate
-							</Text>
-						</>
-					) : (
-						<>
-							<Text
-								c="dimmed"
-								size="xl"
-								fw={700}
-								style={{
-									fontFamily: "var(--mantine-font-family-headings)",
-									letterSpacing: "-0.01em",
-								}}
-							>
-								Empty stomach?
-							</Text>
-							<Text c="dimmed" size="md" ta="center" style={{ maxWidth: 300 }}>
-								Type what you ate above. We'll do the math.
-							</Text>
-						</>
-					)}
-				</Stack>
-			)}
-
-			{logs.length > 0 && (
-				<Stack mt="2.5rem" gap="md">
-					<Text
-						fw={700}
-						size="xl"
-						style={{
-							fontFamily: "var(--mantine-font-family-headings)",
-							letterSpacing: "0.02em",
-						}}
-					>
-						Today's Log
-					</Text>
-					{logs.map((log) => (
-						<FoodLogItem key={log._id} entry={log} onDelete={handleDelete} />
-					))}
-				</Stack>
-			)}
-
-			{logs.length > 0 && (
-				<div style={{ marginTop: 32 }}>
-					<MacroBar protein={totalProtein} carbs={totalCarbs} fat={totalFat} />
+				<div style={{ marginTop: "2rem" }}>
+					<FoodInput onSubmit={handleLogFood} />
 				</div>
-			)}
 
-			{logs.length > 0 && (
-				<Anchor href="/history" ta="center" display="block" mt="xl" c="dimmed">
-					View past days
-				</Anchor>
-			)}
+				{logs.length === 0 && (
+					<Stack align="center" mt="4rem" gap="xs">
+						{pendingLog ? (
+							<>
+								<Text
+									c="teal.5"
+									size="xl"
+									fw={700}
+									style={{
+										fontFamily: "var(--mantine-font-family-headings)",
+										letterSpacing: "-0.01em",
+									}}
+								>
+									Thinking...
+								</Text>
+								<Text c="dimmed" size="md" ta="center">
+									Figuring out what you just ate
+								</Text>
+							</>
+						) : (
+							<>
+								<Text
+									c="dimmed"
+									size="xl"
+									fw={700}
+									style={{
+										fontFamily: "var(--mantine-font-family-headings)",
+										letterSpacing: "-0.01em",
+									}}
+								>
+									Empty stomach?
+								</Text>
+								<Text
+									c="dimmed"
+									size="md"
+									ta="center"
+									style={{ maxWidth: 300 }}
+								>
+									Type what you ate above. We'll do the math.
+								</Text>
+							</>
+						)}
+					</Stack>
+				)}
 
-			<BottomNav />
-		</Container>
+				{logs.length > 0 && (
+					<Stack mt="2.5rem" gap="md">
+						<Text
+							fw={700}
+							size="xl"
+							style={{
+								fontFamily: "var(--mantine-font-family-headings)",
+								letterSpacing: "0.02em",
+							}}
+						>
+							Today's Log
+						</Text>
+						{logs.map((log) => (
+							<FoodLogItem key={log._id} entry={log} onDelete={handleDelete} />
+						))}
+					</Stack>
+				)}
+
+				{logs.length > 0 && (
+					<div style={{ marginTop: 32 }}>
+						<MacroBar
+							protein={totalProtein}
+							carbs={totalCarbs}
+							fat={totalFat}
+						/>
+					</div>
+				)}
+
+				{logs.length > 0 && (
+					<Anchor
+						href="/history"
+						ta="center"
+						display="block"
+						mt="xl"
+						c="dimmed"
+					>
+						View past days
+					</Anchor>
+				)}
+
+				<BottomNav />
+			</Container>
+		</PageTransition>
 	);
 }

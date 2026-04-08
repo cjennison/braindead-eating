@@ -8,6 +8,7 @@ import "@fontsource/geist-mono/400.css";
 import "@fontsource/geist-mono/600.css";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import "./globals.css";
 import { ColorSchemeScript } from "@mantine/core";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
@@ -33,7 +34,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 			<body
 				style={{
 					margin: 0,
-					paddingBottom: "100px",
 				}}
 			>
 				<Providers>{children}</Providers>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { BottomNav } from "@/components/BottomNav";
+import { PageTransition } from "@/components/PageTransition";
 import { WeightChart } from "@/components/WeightChart";
 import { WeightInput } from "@/components/WeightInput";
 import type { UserProfile, WeightLogEntry } from "@/types";
@@ -79,42 +80,48 @@ export default function WeightPage() {
 			: null;
 
 	return (
-		<Container size={480} py="md" pb={100}>
-			<Title order={3} mb="xl">
-				Your Weight
-			</Title>
+		<PageTransition>
+			<Container
+				size={480}
+				py="md"
+				style={{ paddingBottom: "var(--page-bottom-padding)" }}
+			>
+				<Title order={3} mb="xl">
+					Your Weight
+				</Title>
 
-			{latest && (
-				<Stack align="center" mb="xl">
-					<Text fw={700} style={{ fontSize: "2.5rem", lineHeight: 1.1 }}>
-						{latest.weight} {unit}
-					</Text>
-					<Text c="dimmed" size="sm">
-						logged {latest.date}
-					</Text>
-				</Stack>
-			)}
-
-			<WeightInput unit={unit} onSubmit={handleLogWeight} />
-
-			{goalWeight && (
-				<Stack mt="xl" gap={4} align="center">
-					<Text c="dimmed">
-						Goal: {goalWeight} {unit}
-					</Text>
-					{toGo && (
-						<Text fw={500}>
-							To go: {toGo} {unit}
+				{latest && (
+					<Stack align="center" mb="xl">
+						<Text fw={700} style={{ fontSize: "2.5rem", lineHeight: 1.1 }}>
+							{latest.weight} {unit}
 						</Text>
-					)}
-				</Stack>
-			)}
+						<Text c="dimmed" size="sm">
+							logged {latest.date}
+						</Text>
+					</Stack>
+				)}
 
-			<div style={{ marginTop: 32 }}>
-				<WeightChart entries={entries} unit={unit} />
-			</div>
+				<WeightInput unit={unit} onSubmit={handleLogWeight} />
 
-			<BottomNav />
-		</Container>
+				{goalWeight && (
+					<Stack mt="xl" gap={4} align="center">
+						<Text c="dimmed">
+							Goal: {goalWeight} {unit}
+						</Text>
+						{toGo && (
+							<Text fw={500}>
+								To go: {toGo} {unit}
+							</Text>
+						)}
+					</Stack>
+				)}
+
+				<div style={{ marginTop: 32 }}>
+					<WeightChart entries={entries} unit={unit} />
+				</div>
+
+				<BottomNav />
+			</Container>
+		</PageTransition>
 	);
 }

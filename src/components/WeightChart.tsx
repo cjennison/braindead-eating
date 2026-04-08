@@ -67,28 +67,39 @@ export function WeightChart({ entries, unit }: WeightChartProps) {
 					y1={paddingY + innerHeight}
 					x2={paddingX + innerWidth}
 					y2={paddingY + innerHeight}
-					stroke="#E0E0E0"
+					stroke="var(--mantine-color-default-border)"
 					strokeWidth="1"
 				/>
 				<path
 					d={linePath}
 					fill="none"
-					stroke="#5BAFA8"
+					stroke="var(--mantine-color-teal-5)"
 					strokeWidth="2.5"
 					strokeLinecap="round"
 					strokeLinejoin="round"
 				/>
 				{points.map((p) => (
-					<circle key={p.date} cx={p.x} cy={p.y} r="4" fill="#5BAFA8" />
+					<circle
+						key={p.date}
+						cx={p.x}
+						cy={p.y}
+						r="4"
+						fill="var(--mantine-color-teal-5)"
+					/>
 				))}
-				<text x={paddingX} y={paddingY - 8} fontSize="12" fill="#8E8E8E">
+				<text
+					x={paddingX}
+					y={paddingY - 8}
+					fontSize="12"
+					fill="var(--mantine-color-dimmed)"
+				>
 					{maxWeight.toFixed(1)} {unit}
 				</text>
 				<text
 					x={paddingX}
 					y={paddingY + innerHeight + 16}
 					fontSize="12"
-					fill="#8E8E8E"
+					fill="var(--mantine-color-dimmed)"
 				>
 					{minWeight.toFixed(1)} {unit}
 				</text>
