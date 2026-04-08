@@ -1,32 +1,36 @@
 {
-  "name": "braindead-eating",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "check": "biome check --write .",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@mantine/core": "^9.0.1",
-    "@mantine/hooks": "^9.0.1",
-    "@mantine/notifications": "^9.0.1",
-    "mongoose": "^9.4.1",
-    "next": "^16.2.2",
-    "next-auth": "^5.0.0-beta.30",
-    "openai": "^6.33.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.4.10",
-    "@capacitor/cli": "^8.3.0",
-    "@capacitor/core": "^8.3.0",
-    "@types/node": "^25.5.2",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "typescript": "^6.0.2"
-  }
+	"name": "braindead-eating",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev --turbopack",
+		"build": "next build",
+		"start": "next start",
+		"check": "biome check --write .",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@fontsource/bricolage-grotesque": "^5.2.10",
+		"@fontsource/geist-mono": "^5.2.7",
+		"@fontsource/geist-sans": "^5.2.5",
+		"@fontsource/inter": "^5.2.8",
+		"@mantine/core": "^9.0.1",
+		"@mantine/hooks": "^9.0.1",
+		"@mantine/notifications": "^9.0.1",
+		"mongoose": "^9.4.1",
+		"next": "^16.2.2",
+		"next-auth": "^5.0.0-beta.30",
+		"openai": "^6.33.0",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.10",
+		"@capacitor/cli": "^8.3.0",
+		"@capacitor/core": "^8.3.0",
+		"@types/node": "^25.5.2",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"typescript": "^6.0.2"
+	}
 }

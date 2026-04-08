@@ -6,52 +6,52 @@ import { User } from "@/lib/models/User";
 import { WeightLog } from "@/lib/models/WeightLog";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+	const session = await auth();
+	if (!session?.user?.id) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
 
-  await connectDB();
+	await connectDB();
 
-  const logs = await WeightLog.find({ userId: session.user.id })
-    .sort({ date: -1 })
-    .limit(30)
-    .lean();
+	const logs = await WeightLog.find({ userId: session.user.id })
+		.sort({ date: -1 })
+		.limit(30)
+		.lean();
 
-  return NextResponse.json(logs);
+	return NextResponse.json(logs);
 }
 
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+	const session = await auth();
+	if (!session?.user?.id) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
 
-  const body = await request.json();
-  const weight = body.weight;
+	const body = await request.json();
+	const weight = body.weight;
 
-  if (!weight || typeof weight !== "number" || weight <= 0) {
-    return NextResponse.json(
-      { error: "Enter a valid weight." },
-      { status: 400 },
-    );
-  }
+	if (!weight || typeof weight !== "number" || weight <= 0) {
+		return NextResponse.json(
+			{ error: "Enter a valid weight." },
+			{ status: 400 },
+		);
+	}
 
-  await connectDB();
+	await connectDB();
 
-  const user = await User.findById(session.user.id).lean();
-  const typedUser = user as unknown as { timezone: string } | null;
-  const today = getTodayForTimezone(typedUser?.timezone || "UTC");
+	const user = await User.findById(session.user.id).lean();
+	const typedUser = user as unknown as { timezone: string } | null;
+	const today = getTodayForTimezone(typedUser?.timezone || "UTC");
 
-  const log = await WeightLog.findOneAndUpdate(
-    { userId: session.user.id, date: today },
-    { weight },
-    { upsert: true, new: true },
-  );
+	const log = await WeightLog.findOneAndUpdate(
+		{ userId: session.user.id, date: today },
+		{ weight },
+		{ upsert: true, new: true },
+	);
 
-  await User.findByIdAndUpdate(session.user.id, {
-    currentWeight: weight,
-  });
+	await User.findByIdAndUpdate(session.user.id, {
+		currentWeight: weight,
+	});
 
-  return NextResponse.json(log, { status: 201 });
+	return NextResponse.json(log, { status: 201 });
 }

@@ -7,12 +7,12 @@ import type { ReactNode } from "react";
 import { theme } from "@/theme";
 
 export function Providers({ children }: { children: ReactNode }) {
-  return (
-    <SessionProvider>
-      <MantineProvider theme={theme}>
-        <Notifications position="top-center" />
-        {children}
-      </MantineProvider>
-    </SessionProvider>
-  );
+	return (
+		<SessionProvider>
+			<MantineProvider theme={theme} defaultColorScheme="dark">
+				<Notifications position="top-center" />
+				{children}
+			</MantineProvider>
+		</SessionProvider>
+	);
 }

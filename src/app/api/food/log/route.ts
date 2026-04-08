@@ -9,102 +9,102 @@ import { parseFood } from "@/lib/openai";
 import { AI_DAILY_LIMIT } from "@/types";
 
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+	const session = await auth();
+	if (!session?.user?.id) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
 
-  const body = await request.json();
-  const input = body.input;
+	const body = await request.json();
+	const input = body.input;
 
-  if (!input || typeof input !== "string" || input.trim().length === 0) {
-    return NextResponse.json(
-      { error: "Tell me what you ate." },
-      { status: 400 },
-    );
-  }
+	if (!input || typeof input !== "string" || input.trim().length === 0) {
+		return NextResponse.json(
+			{ error: "Tell me what you ate." },
+			{ status: 400 },
+		);
+	}
 
-  const trimmed = input.trim();
-  if (trimmed.length > 500) {
-    return NextResponse.json(
-      { error: "Keep it shorter. Just list what you ate." },
-      { status: 400 },
-    );
-  }
+	const trimmed = input.trim();
+	if (trimmed.length > 500) {
+		return NextResponse.json(
+			{ error: "Keep it shorter. Just list what you ate." },
+			{ status: 400 },
+		);
+	}
 
-  await connectDB();
+	await connectDB();
 
-  const user = await User.findById(session.user.id).lean();
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
-  }
+	const user = await User.findById(session.user.id).lean();
+	if (!user) {
+		return NextResponse.json({ error: "User not found" }, { status: 404 });
+	}
 
-  const typedUser = user as unknown as { timezone: string };
-  const today = getTodayForTimezone(typedUser.timezone || "UTC");
+	const typedUser = user as unknown as { timezone: string };
+	const today = getTodayForTimezone(typedUser.timezone || "UTC");
 
-  const usage = await AiUsage.findOne({
-    userId: session.user.id,
-    date: today,
-  });
+	const usage = await AiUsage.findOne({
+		userId: session.user.id,
+		date: today,
+	});
 
-  if (usage && usage.count >= AI_DAILY_LIMIT) {
-    return NextResponse.json(
-      {
-        error: "You've logged all your meals for today. Resets at midnight.",
-      },
-      { status: 429 },
-    );
-  }
+	if (usage && usage.count >= AI_DAILY_LIMIT) {
+		return NextResponse.json(
+			{
+				error: "You've logged all your meals for today. Resets at midnight.",
+			},
+			{ status: 429 },
+		);
+	}
 
-  await AiUsage.findOneAndUpdate(
-    { userId: session.user.id, date: today },
-    { $inc: { count: 1 } },
-    { upsert: true },
-  );
+	await AiUsage.findOneAndUpdate(
+		{ userId: session.user.id, date: today },
+		{ $inc: { count: 1 } },
+		{ upsert: true },
+	);
 
-  const result = await parseFood(trimmed);
+	const result = await parseFood(trimmed);
 
-  if ("error" in result) {
-    return NextResponse.json({ error: result.message }, { status: 422 });
-  }
+	if ("error" in result) {
+		return NextResponse.json({ error: result.message }, { status: 422 });
+	}
 
-  const foodLog = await FoodLog.create({
-    userId: session.user.id,
-    date: today,
-    rawInput: trimmed,
-    items: result.items,
-    totalCalories: result.total.calories,
-    totalProtein_g: result.total.protein_g,
-    totalCarbs_g: result.total.carbs_g,
-    totalFat_g: result.total.fat_g,
-  });
+	const foodLog = await FoodLog.create({
+		userId: session.user.id,
+		date: today,
+		rawInput: trimmed,
+		items: result.items,
+		totalCalories: result.total.calories,
+		totalProtein_g: result.total.protein_g,
+		totalCarbs_g: result.total.carbs_g,
+		totalFat_g: result.total.fat_g,
+	});
 
-  return NextResponse.json(foodLog, { status: 201 });
+	return NextResponse.json(foodLog, { status: 201 });
 }
 
 export async function GET(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+	const session = await auth();
+	if (!session?.user?.id) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
 
-  await connectDB();
+	await connectDB();
 
-  const { searchParams } = new URL(request.url);
-  let date = searchParams.get("date");
+	const { searchParams } = new URL(request.url);
+	let date = searchParams.get("date");
 
-  if (!date) {
-    const user = await User.findById(session.user.id).lean();
-    const typedUser = user as unknown as { timezone: string } | null;
-    date = getTodayForTimezone(typedUser?.timezone || "UTC");
-  }
+	if (!date) {
+		const user = await User.findById(session.user.id).lean();
+		const typedUser = user as unknown as { timezone: string } | null;
+		date = getTodayForTimezone(typedUser?.timezone || "UTC");
+	}
 
-  const logs = await FoodLog.find({
-    userId: session.user.id,
-    date,
-  })
-    .sort({ createdAt: -1 })
-    .lean();
+	const logs = await FoodLog.find({
+		userId: session.user.id,
+		date,
+	})
+		.sort({ createdAt: -1 })
+		.lean();
 
-  return NextResponse.json(logs);
+	return NextResponse.json(logs);
 }

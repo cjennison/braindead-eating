@@ -2,17 +2,17 @@ import "next-auth";
 import "next-auth/jwt";
 
 declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      onboardingComplete: boolean;
-    } & import("next-auth").DefaultSession["user"];
-  }
+	interface Session {
+		user: {
+			id: string;
+			onboardingComplete: boolean;
+		} & import("next-auth").DefaultSession["user"];
+	}
 }
 
 declare module "next-auth/jwt" {
-  interface JWT {
-    userId?: string;
-    onboardingComplete?: boolean;
-  }
+	interface JWT {
+		userId?: string;
+		onboardingComplete?: boolean;
+	}
 }
