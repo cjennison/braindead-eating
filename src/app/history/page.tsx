@@ -13,7 +13,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
-import { BottomNav } from "@/components/BottomNav";
+
 import { PageTransition } from "@/components/PageTransition";
 import type { FoodLogEntry, UserProfile } from "@/types";
 import { formatNumber } from "@/types";
@@ -86,7 +86,11 @@ export default function HistoryPage() {
 
 	if (status === "loading" || loading) {
 		return (
-			<Container size={480} py="xl" pb={80}>
+			<Container
+				size={480}
+				pt="xl"
+				style={{ paddingBottom: "var(--page-bottom-padding)" }}
+			>
 				<Skeleton height={40} mb="xl" />
 				<Stack gap="sm">
 					{SKELETON_KEYS.map((key) => (
@@ -101,7 +105,7 @@ export default function HistoryPage() {
 		<PageTransition>
 			<Container
 				size={480}
-				py="md"
+				pt="md"
 				style={{ paddingBottom: "var(--page-bottom-padding)" }}
 			>
 				<Title order={3} mb="xl">
@@ -160,8 +164,6 @@ export default function HistoryPage() {
 						))}
 					</Stack>
 				)}
-
-				<BottomNav />
 			</Container>
 		</PageTransition>
 	);

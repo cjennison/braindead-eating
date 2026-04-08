@@ -5,7 +5,7 @@ import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
-import { BottomNav } from "@/components/BottomNav";
+
 import { PageTransition } from "@/components/PageTransition";
 import { WeightChart } from "@/components/WeightChart";
 import { WeightInput } from "@/components/WeightInput";
@@ -63,7 +63,11 @@ export default function WeightPage() {
 
 	if (status === "loading" || loading) {
 		return (
-			<Container size={480} py="xl" pb={80}>
+			<Container
+				size={480}
+				pt="xl"
+				style={{ paddingBottom: "var(--page-bottom-padding)" }}
+			>
 				<Skeleton height={40} mb="xl" />
 				<Skeleton height={80} mb="xl" />
 				<Skeleton height={200} />
@@ -83,7 +87,7 @@ export default function WeightPage() {
 		<PageTransition>
 			<Container
 				size={480}
-				py="md"
+				pt="md"
 				style={{ paddingBottom: "var(--page-bottom-padding)" }}
 			>
 				<Title order={3} mb="xl">
@@ -119,8 +123,6 @@ export default function WeightPage() {
 				<div style={{ marginTop: 32 }}>
 					<WeightChart entries={entries} unit={unit} />
 				</div>
-
-				<BottomNav />
 			</Container>
 		</PageTransition>
 	);

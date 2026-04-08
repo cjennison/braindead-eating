@@ -5,7 +5,7 @@ import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
-import { BottomNav } from "@/components/BottomNav";
+
 import { CalorieDisplay } from "@/components/CalorieDisplay";
 import { FoodInput } from "@/components/FoodInput";
 import { FoodLogItem } from "@/components/FoodLogItem";
@@ -85,7 +85,11 @@ export default function HomePage() {
 
 	if (status === "loading" || loading) {
 		return (
-			<Container size={480} py="xl" pb={80}>
+			<Container
+				size={480}
+				pt="xl"
+				style={{ paddingBottom: "var(--page-bottom-padding)" }}
+			>
 				<Skeleton height={40} mb="xl" />
 				<Skeleton height={80} mb="md" />
 				<Skeleton height={120} mb="md" />
@@ -106,7 +110,7 @@ export default function HomePage() {
 		<PageTransition>
 			<Container
 				size={480}
-				py="md"
+				pt="md"
 				style={{ paddingBottom: "var(--page-bottom-padding)" }}
 			>
 				<Title
@@ -208,8 +212,6 @@ export default function HomePage() {
 						View past days
 					</Anchor>
 				)}
-
-				<BottomNav />
 			</Container>
 		</PageTransition>
 	);
