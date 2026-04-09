@@ -113,8 +113,39 @@ export async function GET(request: Request) {
 	await connectDB();
 
 	const { searchParams } = new URL(request.url);
+	const startDate = searchParams.get("startDate");
+	const endDate = searchParams.get("endDate");
 	let date = searchParams.get("date");
 
+	// Date range mode: return logs grouped by date
+	if (startDate && endDate) {
+		const logs = await FoodLog.find({
+			userId: session.user.id,
+			date: { $gte: startDate, $lte: endDate },
+		})
+			.sort({ date: -1, createdAt: -1 })
+			.lean();
+
+		const grouped: Record<
+			string,
+			{ logs: typeof logs; totalCalories: number; itemCount: number }
+		> = {};
+		for (const log of logs) {
+			const d = log.date as string;
+			if (!grouped[d]) {
+				grouped[d] = { logs: [], totalCalories: 0, itemCount: 0 };
+			}
+			grouped[d].logs.push(log);
+			grouped[d].totalCalories += log.totalCalories as number;
+			grouped[d].itemCount += (
+				log.items as Array<Record<string, unknown>>
+			).length;
+		}
+
+		return NextResponse.json({ days: grouped });
+	}
+
+	// Single date mode (existing behavior)
 	if (!date) {
 		const user = await User.findById(session.user.id).lean();
 		const typedUser = user as unknown as { timezone: string } | null;

@@ -1,4 +1,4 @@
-# Brain Dead Eating
+# Braindead Eating
 
 > **It's Brain Dead.**
 
@@ -10,7 +10,7 @@ A calorie tracking app so simple that anyone can use it. No food databases. No b
 
 Tracking calories is important but existing apps make it painfully hard. They require searching databases, scanning barcodes, measuring portions, and navigating complex interfaces. Most people give up within a week.
 
-Brain Dead Eating solves this by removing every possible barrier. You open the app, you say what you ate, and AI does the rest. That's it.
+Braindead Eating solves this by removing every possible barrier. You open the app, you say what you ate, and AI does the rest. That's it.
 
 ---
 
@@ -338,7 +338,7 @@ Easy on the eyes. Calming. No harsh reds or aggressive colors.
 
 ```
 ┌──────────────────────────────┐
-│  Brain Dead Eating           │
+│  Braindead Eating           │
 │                              │
 │  ┌────────────────────────┐  │
 │  │  1,340                 │  │
@@ -440,7 +440,7 @@ After Google sign-in, if no profile data exists:
 ┌──────────────────────────────┐
 │                              │
 │  Welcome to                  │
-│  Brain Dead Eating            │
+│  Braindead Eating            │
 │                              │
 │  Let's get you set up.       │
 │  3 quick questions.          │

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	ActionIcon,
 	Card,
 	Container,
 	Group,
@@ -10,19 +11,56 @@ import {
 	Title,
 	UnstyledButton,
 } from "@mantine/core";
+import {
+	IconArrowLeft,
+	IconChevronDown,
+	IconChevronRight,
+} from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 
 import { PageTransition } from "@/components/PageTransition";
-import type { FoodLogEntry, UserProfile } from "@/types";
-import { formatNumber } from "@/types";
+import type { FoodLogEntry, SubscriptionTier, UserProfile } from "@/types";
+import { formatNumber, getEffectiveTier, roundGrams } from "@/types";
+
+function formatDateLabel(dateStr: string): string {
+	const [year, month, day] = dateStr.split("-").map(Number);
+	const date = new Date(year, month - 1, day);
+	const today = new Date();
+	const yesterday = new Date();
+	yesterday.setDate(today.getDate() - 1);
+
+	if (
+		date.getFullYear() === today.getFullYear() &&
+		date.getMonth() === today.getMonth() &&
+		date.getDate() === today.getDate()
+	) {
+		return "Today";
+	}
+	if (
+		date.getFullYear() === yesterday.getFullYear() &&
+		date.getMonth() === yesterday.getMonth() &&
+		date.getDate() === yesterday.getDate()
+	) {
+		return "Yesterday";
+	}
+
+	return date.toLocaleDateString("en-US", {
+		weekday: "short",
+		month: "short",
+		day: "numeric",
+	});
+}
 
 interface DaySummary {
 	date: string;
 	totalCalories: number;
 	itemCount: number;
 	logs: FoodLogEntry[];
+	totalProtein: number;
+	totalCarbs: number;
+	totalFat: number;
 }
 
 const SKELETON_KEYS = ["s1", "s2", "s3", "s4", "s5"];
@@ -33,6 +71,7 @@ export default function HistoryPage() {
 	const [days, setDays] = useState<DaySummary[]>([]);
 	const [expandedDate, setExpandedDate] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [tier, setTier] = useState<SubscriptionTier>("free");
 
 	const fetchHistory = useCallback(async () => {
 		const userRes = await fetch("/api/user");
@@ -40,39 +79,61 @@ export default function HistoryPage() {
 
 		const user: UserProfile = await userRes.json();
 		const timezone = user.timezone || "UTC";
+		setTier(
+			getEffectiveTier({
+				subscriptionTier: user.subscriptionTier,
+				subscriptionExpiresAt: user.subscriptionExpiresAt
+					? new Date(user.subscriptionExpiresAt)
+					: null,
+			}),
+		);
 
-		const pastDays: string[] = [];
-		for (let i = 1; i <= 30; i++) {
-			const d = new Date();
-			d.setDate(d.getDate() - i);
-			const dateStr = new Intl.DateTimeFormat("en-CA", {
-				timeZone: timezone,
-				year: "numeric",
-				month: "2-digit",
-				day: "2-digit",
-			}).format(d);
-			pastDays.push(dateStr);
+		const endDate = new Intl.DateTimeFormat("en-CA", {
+			timeZone: timezone,
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+		}).format(new Date());
+
+		const startD = new Date();
+		startD.setDate(startD.getDate() - 30);
+		const startDate = new Intl.DateTimeFormat("en-CA", {
+			timeZone: timezone,
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+		}).format(startD);
+
+		const res = await fetch(
+			`/api/food/log?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`,
+		);
+		if (!res.ok) {
+			setLoading(false);
+			return;
 		}
 
-		const results: DaySummary[] = [];
-		for (const date of pastDays) {
-			const res = await fetch(`/api/food/log?date=${encodeURIComponent(date)}`);
-			if (res.ok) {
-				const data = (await res.json()) as {
+		const data = (await res.json()) as {
+			days: Record<
+				string,
+				{
 					logs: FoodLogEntry[];
-					aiUsageCount: number;
-				};
-				const logs = data.logs;
-				if (logs.length > 0) {
-					const totalCalories = logs.reduce(
-						(sum, l) => sum + l.totalCalories,
-						0,
-					);
-					const itemCount = logs.reduce((sum, l) => sum + l.items.length, 0);
-					results.push({ date, totalCalories, itemCount, logs });
+					totalCalories: number;
+					itemCount: number;
 				}
-			}
-		}
+			>;
+		};
+
+		const results: DaySummary[] = Object.entries(data.days)
+			.map(([date, day]) => ({
+				date,
+				totalCalories: day.totalCalories,
+				itemCount: day.itemCount,
+				logs: day.logs,
+				totalProtein: day.logs.reduce((s, l) => s + l.totalProtein_g, 0),
+				totalCarbs: day.logs.reduce((s, l) => s + l.totalCarbs_g, 0),
+				totalFat: day.logs.reduce((s, l) => s + l.totalFat_g, 0),
+			}))
+			.sort((a, b) => b.date.localeCompare(a.date));
 
 		setDays(results);
 		setLoading(false);
@@ -92,13 +153,16 @@ export default function HistoryPage() {
 		return (
 			<Container
 				size={480}
-				pt="xl"
+				pt="md"
 				style={{ paddingBottom: "var(--page-bottom-padding)" }}
 			>
-				<Skeleton height={40} mb="xl" />
-				<Stack gap="sm">
+				<Group gap="sm" mb="xl">
+					<Skeleton height={36} width={36} circle />
+					<Skeleton height={28} width={120} />
+				</Group>
+				<Stack gap="md">
 					{SKELETON_KEYS.map((key) => (
-						<Skeleton key={key} height={60} />
+						<Skeleton key={key} height={72} radius="xl" />
 					))}
 				</Stack>
 			</Container>
@@ -112,60 +176,170 @@ export default function HistoryPage() {
 				pt="md"
 				style={{ paddingBottom: "var(--page-bottom-padding)" }}
 			>
-				<Title order={3} mb="xl">
-					Past Days
-				</Title>
+				<Group gap="sm" mb="xl" align="center">
+					<ActionIcon
+						variant="subtle"
+						size="lg"
+						radius="xl"
+						onClick={() => router.push("/app")}
+						aria-label="Back to today"
+					>
+						<IconArrowLeft size={20} />
+					</ActionIcon>
+					<Title
+						order={3}
+						style={{
+							letterSpacing: "-0.02em",
+						}}
+					>
+						History
+					</Title>
+				</Group>
 
 				{days.length === 0 ? (
-					<Text c="dimmed" ta="center" py="xl">
-						No history yet. Start logging food.
-					</Text>
+					<Stack align="center" mt="4rem" gap="xs">
+						<Text
+							c="dimmed"
+							size="xl"
+							fw={700}
+							style={{
+								fontFamily: "var(--mantine-font-family-headings)",
+								letterSpacing: "-0.01em",
+							}}
+						>
+							Nothing here yet
+						</Text>
+						<Text c="dimmed" size="md" ta="center" style={{ maxWidth: 300 }}>
+							Log some food and it will show up here.
+						</Text>
+					</Stack>
 				) : (
-					<Stack gap="sm">
-						{days.map((day) => (
-							<div key={day.date}>
-								<UnstyledButton
-									onClick={() =>
-										setExpandedDate(expandedDate === day.date ? null : day.date)
-									}
-									w="100%"
-								>
-									<Card padding="md" radius="md" withBorder>
-										<Group justify="space-between">
-											<div>
-												<Text fw={600}>{day.date}</Text>
-												<Text c="dimmed" size="sm">
-													{day.itemCount} item
-													{day.itemCount !== 1 ? "s" : ""}
-												</Text>
-											</div>
-											<Text fw={600}>
-												{formatNumber(day.totalCalories)} cal
-											</Text>
-										</Group>
-									</Card>
-								</UnstyledButton>
-								{expandedDate === day.date && (
-									<Card ml="md" mt={4} padding="sm" radius="md">
-										<Stack gap={4}>
-											{day.logs.flatMap((log) =>
-												log.items.map((item) => (
-													<Group
-														key={`${log._id}-${item.name}`}
-														justify="space-between"
+					<Stack gap="md">
+						{days.map((day) => {
+							const isExpanded = expandedDate === day.date;
+							return (
+								<div key={day.date}>
+									<UnstyledButton
+										onClick={() =>
+											setExpandedDate(isExpanded ? null : day.date)
+										}
+										w="100%"
+									>
+										<Card padding="lg" radius="xl" withBorder>
+											<Group
+												justify="space-between"
+												align="center"
+												wrap="nowrap"
+											>
+												<Stack gap={2}>
+													<Text
+														fw={700}
+														size="lg"
+														style={{
+															fontFamily: "var(--mantine-font-family-headings)",
+															letterSpacing: "-0.01em",
+														}}
 													>
-														<Text size="sm">{item.name}</Text>
-														<Text size="sm" fw={500}>
-															{formatNumber(item.calories)}
+														{formatDateLabel(day.date)}
+													</Text>
+													<Text c="dimmed" size="sm">
+														{day.itemCount} item
+														{day.itemCount !== 1 ? "s" : ""}
+													</Text>
+												</Stack>
+												<Group gap="sm" wrap="nowrap">
+													<Text
+														fw={700}
+														size="lg"
+														style={{
+															fontFamily: "var(--mantine-font-family-headings)",
+															color: "var(--mantine-color-teal-5)",
+														}}
+													>
+														{formatNumber(day.totalCalories)}
+														<Text span size="xs" c="dimmed" fw={500} ml={2}>
+															cal
+														</Text>
+													</Text>
+													{isExpanded ? (
+														<IconChevronDown size={18} color="gray" />
+													) : (
+														<IconChevronRight size={18} color="gray" />
+													)}
+												</Group>
+											</Group>
+										</Card>
+									</UnstyledButton>
+									{isExpanded && (
+										<Card mt="xs" ml="md" padding="lg" radius="xl" withBorder>
+											<Stack gap={12}>
+												{day.logs.flatMap((log) =>
+													log.items.map((item) => (
+														<Group
+															key={`${log._id}-${item.name}`}
+															justify="space-between"
+															wrap="nowrap"
+															align="flex-start"
+														>
+															<Text
+																size="md"
+																fw={600}
+																style={{
+																	flex: 1,
+																	fontFamily:
+																		"var(--mantine-font-family-headings)",
+																	letterSpacing: "-0.01em",
+																	lineHeight: 1.3,
+																	wordBreak: "break-word",
+																}}
+															>
+																{item.name}
+															</Text>
+															<Text
+																size="md"
+																fw={700}
+																style={{
+																	flexShrink: 0,
+																	fontFamily:
+																		"var(--mantine-font-family-headings)",
+																	color: "var(--mantine-color-teal-5)",
+																}}
+															>
+																{formatNumber(item.calories)}
+																<Text span size="xs" c="dimmed" fw={500} ml={2}>
+																	cal
+																</Text>
+															</Text>
+														</Group>
+													)),
+												)}
+												{(tier === "pro" || tier === "admin") && (
+													<Group
+														mt={8}
+														pt={8}
+														gap="lg"
+														style={{
+															borderTop:
+																"1px dashed var(--mantine-color-default-border)",
+														}}
+													>
+														<Text size="sm" c="blue.5" fw={600}>
+															P: {roundGrams(day.totalProtein)}g
+														</Text>
+														<Text size="sm" c="green.6" fw={600}>
+															C: {roundGrams(day.totalCarbs)}g
+														</Text>
+														<Text size="sm" c="orange.5" fw={600}>
+															F: {roundGrams(day.totalFat)}g
 														</Text>
 													</Group>
-												)),
-											)}
-										</Stack>
-									</Card>
-								)}
-							</div>
-						))}
+												)}
+											</Stack>
+										</Card>
+									)}
+								</div>
+							);
+						})}
 					</Stack>
 				)}
 			</Container>

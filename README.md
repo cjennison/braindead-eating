@@ -1,4 +1,4 @@
-# Brain Dead Eating
+# Braindead Eating
 
 ## iOS Development
 

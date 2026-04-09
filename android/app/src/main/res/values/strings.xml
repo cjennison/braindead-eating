@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Brain Dead Eating</string>
-    <string name="title_activity_main">Brain Dead Eating</string>
+    <string name="app_name">Braindead Eating</string>
+    <string name="title_activity_main">Braindead Eating</string>
     <string name="package_name">com.cjennison.braindead.eating</string>
     <string name="custom_url_scheme">com.cjennison.braindead.eating</string>
 </resources>

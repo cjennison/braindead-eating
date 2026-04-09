@@ -1,5 +1,5 @@
 ---
-description: "Use when working on UI components, layouts, styling, Mantine theme, colors, typography, spacing, or any visual/UX decisions. Covers the Brain Dead Eating design system."
+description: "Use when working on UI components, layouts, styling, Mantine theme, colors, typography, spacing, or any visual/UX decisions. Covers the Braindead Eating design system."
 applyTo: "src/components/**,src/theme/**,src/app/**/page.tsx"
 ---
 

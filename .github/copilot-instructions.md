@@ -1,8 +1,8 @@
-# Brain Dead Eating - Project Instructions
+# Braindead Eating - Project Instructions
 
 ## Project Overview
 
-Brain Dead Eating is a calorie tracking app. The tagline is "It's Brain Dead." The app must be usable by someone with learning disabilities. Every design decision must pass one test: "Could someone use this without thinking?"
+Braindead Eating is a calorie tracking app. The tagline is "It's Brain Dead." The app must be usable by someone with learning disabilities. Every design decision must pass one test: "Could someone use this without thinking?"
 
 Read `PROJECT.md` at the repo root for the full specification, including database schema, API routes, design system, wireframes, deficit modes, and all product decisions.
 

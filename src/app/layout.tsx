@@ -16,7 +16,7 @@ import type { ReactNode } from "react";
 import { theme } from "@/theme";
 
 export const metadata: Metadata = {
-	title: "Brain Dead Eating",
+	title: "Braindead Eating",
 	description: "It's Brain Dead.",
 };
 

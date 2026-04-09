@@ -241,7 +241,10 @@ function TypingDemo() {
 								wrap="nowrap"
 								style={{
 									animation:
-									phase === "done" && DEMO_ITEMS[itemIndex].items.some((di) => di.name === item.name)
+										phase === "done" &&
+										DEMO_ITEMS[itemIndex].items.some(
+											(di) => di.name === item.name,
+										)
 											? "popIn 0.3s ease-out"
 											: "none",
 								}}

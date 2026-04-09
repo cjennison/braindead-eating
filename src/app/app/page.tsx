@@ -97,7 +97,7 @@ export default function AppPage() {
 					c="darkCharcoal.3"
 					style={{ letterSpacing: "-0.02em" }}
 				>
-					Brain Dead Eating
+					Braindead Eating
 				</Title>
 
 				{loading ? (
