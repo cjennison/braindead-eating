@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { AiUsage } from "@/lib/models/AiUsage";
+import { ExerciseLog } from "@/lib/models/ExerciseLog";
 import { FoodLog } from "@/lib/models/FoodLog";
 import { User } from "@/lib/models/User";
 import { WeightLog } from "@/lib/models/WeightLog";
@@ -155,6 +156,7 @@ export async function DELETE() {
 		FoodLog.deleteMany({ userId }),
 		WeightLog.deleteMany({ userId }),
 		AiUsage.deleteMany({ userId }),
+		ExerciseLog.deleteMany({ userId }),
 	]);
 
 	return NextResponse.json({ success: true });
