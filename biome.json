@@ -38,5 +38,17 @@
 	},
 	"files": {
 		"includes": ["src/**", "*.ts", "*.json"]
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["src/app/layout.tsx"],
+			"linter": {
+				"rules": {
+					"security": {
+						"noDangerouslySetInnerHtml": "off"
+					}
+				}
+			}
+		}
+	]
 }

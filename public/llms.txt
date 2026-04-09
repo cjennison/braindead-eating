@@ -1,0 +1,32 @@
+# Brain Dead Eating
+
+> Brain Dead Eating is the simplest calorie tracking app ever made. Users type what they ate in plain English, and AI estimates the calories and macros. No barcode scanning, no food databases, no thinking required. The tagline is "It's Brain Dead."
+
+Brain Dead Eating is a web and mobile app for calorie tracking designed for people who hate calorie tracking. It uses AI (OpenAI) to parse natural language food descriptions into calorie and macro estimates. The app is built with Next.js, deployed on Vercel, and wrapped with Capacitor for iOS and Android.
+
+Key features:
+- Type food in plain English (e.g. "3 slices of costco pizza and a diet coke") and get instant calorie and macro estimates
+- Track daily calorie intake against a personalized target
+- Log exercise as calorie offsets with simple +/- buttons
+- Track weight over time with visual charts
+- View food history with daily summaries
+- Three deficit modes: Cruise Control, Locked In, and Beast Mode
+- Designed for accessibility: big text, big buttons, single column layout, minimum 48px touch targets
+- Free tier with 5 AI food logs per day, Pro tier with 25
+
+The app is designed to be usable by someone with learning disabilities. Every design decision passes one test: "Could someone use this without thinking?"
+
+## Pages
+
+- [Home](https://braindeadeating.com/): Marketing landing page with interactive demo
+- [Privacy Policy](https://braindeadeating.com/privacy): What data we collect and your rights
+- [Terms and Conditions](https://braindeadeating.com/terms): Terms of service
+
+## Technical
+
+- Built with Next.js 15 (App Router), TypeScript, Mantine v7
+- AI: OpenAI GPT for food parsing with structured outputs
+- Database: MongoDB Atlas with Mongoose
+- Auth: Google SSO via Auth.js v5 (JWT strategy)
+- Mobile: Capacitor for iOS and Android
+- Hosting: Vercel

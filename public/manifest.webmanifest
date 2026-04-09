@@ -1,45 +1,54 @@
 {
-  "background_color": "#FFFFFF",
+  "name": "Brain Dead Eating",
+  "short_name": "BDE",
+  "description": "The simplest calorie tracker ever made. Type what you ate, AI does the rest.",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#7CB77C",
+  "orientation": "portrait",
+  "categories": ["health", "fitness", "food"],
+  "lang": "en-US",
   "icons": [
     {
       "src": "../icons/icon-48.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "48x48",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-72.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "72x72",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-96.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "96x96",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-128.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "128x128",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-192.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-256.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "256x256",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-512.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "512x512",
       "purpose": "any maskable"
     }

@@ -2,7 +2,11 @@ import { Anchor, Container, Stack, Text, Title } from "@mantine/core";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Privacy Policy - Brain Dead Eating",
+	title: "Privacy Policy",
+	description:
+		"How Brain Dead Eating handles your data. " +
+		"We collect only what we need, never sell your data, " +
+		"and you can delete everything at any time.",
 };
 
 const CONTACT_EMAIL = "privacy@braindeadeating.com";

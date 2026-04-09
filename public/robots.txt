@@ -1,0 +1,8 @@
+# Brain Dead Eating - robots.txt
+User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /auth/
+Disallow: /api/
+
+Sitemap: https://braindeadeating.com/sitemap.xml

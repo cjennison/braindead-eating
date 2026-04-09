@@ -1,0 +1,75 @@
+# Brain Dead Eating
+
+> Brain Dead Eating is the simplest calorie tracking app ever made. Users type what they ate in plain English, and AI estimates the calories and macros. No barcode scanning, no food databases, no thinking required. The tagline is "It's Brain Dead."
+
+## What is Brain Dead Eating?
+
+Brain Dead Eating is a calorie tracking app designed for people who hate calorie tracking. Instead of searching through food databases or scanning barcodes, you just type what you ate in plain English. Examples:
+
+- "3 slices of costco pizza and a diet coke"
+- "chicken tendies"
+- "egg sammies"
+- "pizza and a bag of snack mix"
+
+The AI figures out the calories and macros (protein, carbs, fat) instantly. No thinking required.
+
+## Who is it for?
+
+Anyone who wants to track calories but finds existing apps too complicated. The app is specifically designed to be usable by someone with learning disabilities. Every design decision passes one test: "Could someone use this without thinking?"
+
+Design principles:
+- Big text, big buttons, big touch targets (minimum 48px)
+- Single column layout, maximum 480px wide
+- No confirmation dialogs for primary actions (food logs save immediately)
+- Error messages in plain English, never technical jargon
+- No emojis anywhere in the interface
+
+## Features
+
+### AI Food Logging
+Type what you ate in everyday language. The AI parses your description and returns calorie and macro estimates. Calories are rounded to the nearest 5 for simplicity. Macros are rounded to the nearest gram.
+
+### Calorie Tracking
+Set a daily calorie target based on your goals. The app shows how many calories you have remaining. Supports three deficit modes:
+- Cruise Control: Slow and steady. You'll barely notice.
+- Locked In: Real results. Real discipline.
+- Beast Mode: Maximum effort. Not for the faint.
+- Holding Steady: You're good where you are (maintenance).
+
+### Exercise Tracking
+Simple +/- buttons to log calories burned from exercise. Exercise calories offset your daily intake, giving you more room to eat.
+
+### Weight Tracking
+Log your weight over time and see your progress on a visual chart.
+
+### Food History
+View past days with full food logs, macro breakdowns, and exercise burns.
+
+### Data Export
+Download all your data (food logs, weight logs, exercise logs) in JSON format at any time.
+
+## Pricing
+
+- Free: 5 AI-powered food logs per day
+- Pro: 25 AI-powered food logs per day (available via trial or promo code)
+
+## Technical Details
+
+- Web app: https://braindeadeating.com
+- Built with Next.js 15, TypeScript, Mantine v7
+- Mobile apps via Capacitor (iOS and Android)
+- AI powered by OpenAI
+- Authentication: Google Sign-In only
+- Data stored in MongoDB Atlas, hosted on Vercel
+
+## Privacy
+
+Brain Dead Eating collects only what is needed to provide the service: name, email, profile picture from Google, plus food logs, weight logs, exercise logs, and preferences. Data is never sold or shared for marketing. Food descriptions sent to OpenAI for calorie estimation do not include any personal information. Users can export or delete all their data at any time.
+
+Full privacy policy: https://braindeadeating.com/privacy
+
+## Contact
+
+Website: https://braindeadeating.com
+Privacy inquiries: privacy@braindeadeating.com
+Developer: Chris Jennison (https://chrisjennison.dev)
