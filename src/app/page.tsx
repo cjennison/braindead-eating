@@ -17,6 +17,7 @@ import {
 	Textarea,
 	Title,
 } from "@mantine/core";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -110,7 +111,7 @@ function TypingDemo() {
 		timeout = setTimeout(typeChar, 800);
 
 		return () => clearTimeout(timeout);
-	}, [phase, itemIndex]);
+	}, [phase, itemIndex, accumulatedItems.length]);
 
 	useEffect(() => {
 		if (phase === "sending") {
@@ -135,7 +136,7 @@ function TypingDemo() {
 			}, 3000);
 			return () => clearTimeout(timeout);
 		}
-	}, [phase]);
+	}, [phase, itemIndex]);
 
 	return (
 		<Stack w="100%" maw={400} gap="lg">
@@ -195,7 +196,10 @@ function TypingDemo() {
 									strokeWidth="3"
 									strokeLinecap="round"
 									strokeLinejoin="round"
+									role="img"
+									aria-label="Done"
 								>
+									<title>Done</title>
 									<polyline points="20 6 9 17 4 12"></polyline>
 								</svg>
 							) : (
@@ -208,7 +212,10 @@ function TypingDemo() {
 									strokeWidth="2"
 									strokeLinecap="round"
 									strokeLinejoin="round"
+									role="img"
+									aria-label="Send"
 								>
+									<title>Send</title>
 									<line x1="12" y1="19" x2="12" y2="5"></line>
 									<polyline points="5 12 12 5 19 12"></polyline>
 								</svg>
@@ -226,15 +233,15 @@ function TypingDemo() {
 								Waiting for food...
 							</Text>
 						)}
-						{accumulatedItems.map((item, i) => (
+						{accumulatedItems.map((item) => (
 							<Group
-								key={i}
+								key={item.name}
 								justify="space-between"
 								align="flex-start"
 								wrap="nowrap"
 								style={{
 									animation:
-										phase === "done" && i < DEMO_ITEMS[itemIndex].items.length
+									phase === "done" && DEMO_ITEMS[itemIndex].items.some((di) => di.name === item.name)
 											? "popIn 0.3s ease-out"
 											: "none",
 								}}
@@ -478,7 +485,7 @@ export default function LandingPage() {
 						Us vs Them
 					</Title>
 
-					<Paper withBorder radius="xl" overflow="hidden" mt="sm">
+					<Paper withBorder radius="xl" mt="sm" style={{ overflow: "hidden" }}>
 						<Table layout="fixed">
 							<Table.Thead bg="var(--mantine-color-gray-0)">
 								<Table.Tr>
@@ -609,7 +616,7 @@ export default function LandingPage() {
 
 					<Stack align="center" gap={4}>
 						<Text size="xs" c="dimmed">
-							Made with <span aria-label="love">❤️</span> in New Hampshire
+							Made with ❤️ in New Hampshire
 						</Text>
 						<Text size="xs" c="dimmed">
 							by{" "}
@@ -659,15 +666,12 @@ export default function LandingPage() {
 									pointerEvents: "none",
 								}}
 							>
-								{/* Using an img tag assuming the file is in public/orangecat.png */}
-								<img
+								<Image
 									src="/orangecat.png"
 									alt="Sneaky orange cat"
-									style={{
-										width: "100%",
-										height: "100%",
-										objectFit: "contain",
-									}}
+									width={120}
+									height={120}
+									style={{ objectFit: "contain" }}
 								/>
 							</Box>
 
