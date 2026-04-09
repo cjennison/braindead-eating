@@ -32,6 +32,11 @@ interface AppDataContextValue {
 	weightEntries: WeightLogEntry[];
 	weightEntriesLoading: boolean;
 	refreshWeightEntries: () => Promise<void>;
+
+	exerciseBurn: number;
+	exerciseBurnLoading: boolean;
+	adjustExerciseBurn: (delta: number) => Promise<void>;
+	refreshExerciseBurn: () => Promise<void>;
 }
 
 const AppDataContext = createContext<AppDataContextValue>({
@@ -49,6 +54,11 @@ const AppDataContext = createContext<AppDataContextValue>({
 	weightEntries: [],
 	weightEntriesLoading: true,
 	refreshWeightEntries: async () => {},
+
+	exerciseBurn: 0,
+	exerciseBurnLoading: true,
+	adjustExerciseBurn: async () => {},
+	refreshExerciseBurn: async () => {},
 });
 
 export function useUser() {
@@ -81,6 +91,16 @@ export function useWeightEntries() {
 	};
 }
 
+export function useExerciseBurn() {
+	const ctx = useContext(AppDataContext);
+	return {
+		exerciseBurn: ctx.exerciseBurn,
+		loading: ctx.exerciseBurnLoading,
+		adjustExerciseBurn: ctx.adjustExerciseBurn,
+		refreshExerciseBurn: ctx.refreshExerciseBurn,
+	};
+}
+
 function isStale(timestamp: number | null): boolean {
 	if (timestamp === null) return true;
 	return Date.now() - timestamp > STALE_THRESHOLD_MS;
@@ -105,6 +125,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
 	const [weightEntries, setWeightEntries] = useState<WeightLogEntry[]>([]);
 	const [weightEntriesLoading, setWeightEntriesLoading] = useState(true);
 	const weightFetchedAt = useRef<number | null>(null);
+
+	// Exercise burn state
+	const [exerciseBurn, setExerciseBurn] = useState(0);
+	const [exerciseBurnLoading, setExerciseBurnLoading] = useState(true);
+	const exerciseFetchedAt = useRef<number | null>(null);
 
 	const fetchUser = useCallback(async () => {
 		const res = await fetch("/api/user");
@@ -142,20 +167,32 @@ export function UserProvider({ children }: { children: ReactNode }) {
 		setWeightEntriesLoading(false);
 	}, []);
 
+	const fetchExerciseBurn = useCallback(async () => {
+		const res = await fetch("/api/exercise");
+		if (res.ok) {
+			const data = (await res.json()) as { caloriesBurned: number };
+			setExerciseBurn(data.caloriesBurned);
+			exerciseFetchedAt.current = Date.now();
+		}
+		setExerciseBurnLoading(false);
+	}, []);
+
 	// Initial fetch on auth
 	useEffect(() => {
 		if (status === "unauthenticated") {
 			setUserLoading(false);
 			setFoodLogsLoading(false);
 			setWeightEntriesLoading(false);
+			setExerciseBurnLoading(false);
 			return;
 		}
 		if (status === "authenticated" && userFetchedAt.current === null) {
 			fetchUser();
 			fetchFoodLogs();
 			fetchWeightEntries();
+			fetchExerciseBurn();
 		}
-	}, [status, fetchUser, fetchFoodLogs, fetchWeightEntries]);
+	}, [status, fetchUser, fetchFoodLogs, fetchWeightEntries, fetchExerciseBurn]);
 
 	// Refresh functions: only show loading if data is stale
 	const refreshUser = useCallback(async () => {
@@ -178,6 +215,26 @@ export function UserProvider({ children }: { children: ReactNode }) {
 		}
 		await fetchWeightEntries();
 	}, [fetchWeightEntries]);
+
+	const refreshExerciseBurn = useCallback(async () => {
+		if (isStale(exerciseFetchedAt.current)) {
+			setExerciseBurnLoading(true);
+		}
+		await fetchExerciseBurn();
+	}, [fetchExerciseBurn]);
+
+	const adjustExerciseBurn = useCallback(async (delta: number) => {
+		setExerciseBurn((prev) => Math.max(0, prev + delta));
+		const res = await fetch("/api/exercise", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ delta }),
+		});
+		if (res.ok) {
+			const data = (await res.json()) as { caloriesBurned: number };
+			setExerciseBurn(data.caloriesBurned);
+		}
+	}, []);
 
 	const updateUser = useCallback((updated: UserProfile) => {
 		setUser(updated);
@@ -205,6 +262,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
 				weightEntries,
 				weightEntriesLoading,
 				refreshWeightEntries,
+				exerciseBurn,
+				exerciseBurnLoading,
+				adjustExerciseBurn,
+				refreshExerciseBurn,
 			}}
 		>
 			{children}

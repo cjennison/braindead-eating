@@ -30,6 +30,10 @@ export interface WeightLogEntry {
 	createdAt: string;
 }
 
+export interface ExerciseLogEntry {
+	caloriesBurned: number;
+}
+
 export type DeficitMode =
 	| "cruise"
 	| "locked-in"

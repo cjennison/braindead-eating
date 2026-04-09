@@ -61,6 +61,7 @@ interface DaySummary {
 	totalProtein: number;
 	totalCarbs: number;
 	totalFat: number;
+	exerciseBurn: number;
 }
 
 const SKELETON_KEYS = ["s1", "s2", "s3", "s4", "s5"];
@@ -104,13 +105,26 @@ export default function HistoryPage() {
 			day: "2-digit",
 		}).format(startD);
 
-		const res = await fetch(
-			`/api/food/log?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`,
-		);
+		const [res, exerciseRes] = await Promise.all([
+			fetch(
+				`/api/food/log?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`,
+			),
+			fetch(
+				`/api/exercise?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`,
+			),
+		]);
 		if (!res.ok) {
 			setLoading(false);
 			return;
 		}
+
+		const exerciseByDate: Record<string, number> = exerciseRes.ok
+			? (
+					(await exerciseRes.json()) as {
+						exerciseByDate: Record<string, number>;
+					}
+				).exerciseByDate
+			: {};
 
 		const data = (await res.json()) as {
 			days: Record<
@@ -132,8 +146,27 @@ export default function HistoryPage() {
 				totalProtein: day.logs.reduce((s, l) => s + l.totalProtein_g, 0),
 				totalCarbs: day.logs.reduce((s, l) => s + l.totalCarbs_g, 0),
 				totalFat: day.logs.reduce((s, l) => s + l.totalFat_g, 0),
+				exerciseBurn: exerciseByDate[date] ?? 0,
 			}))
 			.sort((a, b) => b.date.localeCompare(a.date));
+
+		// Include days with only exercise burn (no food)
+		const existingDates = new Set(results.map((r) => r.date));
+		for (const [date, burn] of Object.entries(exerciseByDate)) {
+			if (!existingDates.has(date) && burn > 0) {
+				results.push({
+					date,
+					totalCalories: 0,
+					itemCount: 0,
+					logs: [],
+					totalProtein: 0,
+					totalCarbs: 0,
+					totalFat: 0,
+					exerciseBurn: burn,
+				});
+			}
+		}
+		results.sort((a, b) => b.date.localeCompare(a.date));
 
 		setDays(results);
 		setLoading(false);
@@ -245,6 +278,8 @@ export default function HistoryPage() {
 													<Text c="dimmed" size="sm">
 														{day.itemCount} item
 														{day.itemCount !== 1 ? "s" : ""}
+														{day.exerciseBurn > 0 &&
+															` + ${formatNumber(day.exerciseBurn)} burned`}
 													</Text>
 												</Stack>
 												<Group gap="sm" wrap="nowrap">
@@ -333,6 +368,22 @@ export default function HistoryPage() {
 															F: {roundGrams(day.totalFat)}g
 														</Text>
 													</Group>
+												)}
+												{day.exerciseBurn > 0 && (
+													<Text
+														size="sm"
+														c="teal.5"
+														fw={600}
+														mt={4}
+														pt={4}
+														style={{
+															borderTop:
+																"1px dashed var(--mantine-color-default-border)",
+														}}
+													>
+														Exercise: +{formatNumber(day.exerciseBurn)} cal
+														burned
+													</Text>
 												)}
 											</Stack>
 										</Card>

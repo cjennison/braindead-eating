@@ -7,11 +7,16 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 import { CalorieDisplay } from "@/components/CalorieDisplay";
+import { ExerciseBurn } from "@/components/ExerciseBurn";
 import { FoodInput } from "@/components/FoodInput";
 import { FoodLogItem } from "@/components/FoodLogItem";
 import { MacroBar } from "@/components/MacroBar";
 import { PageTransition } from "@/components/PageTransition";
-import { useFoodLogs, useUser } from "@/components/UserProvider";
+import {
+	useExerciseBurn,
+	useFoodLogs,
+	useUser,
+} from "@/components/UserProvider";
 import { type FoodLogEntry, getAiDailyLimit, getEffectiveTier } from "@/types";
 
 export default function AppPage() {
@@ -25,6 +30,11 @@ export default function AppPage() {
 		refreshLogs,
 		setLogs,
 	} = useFoodLogs();
+	const {
+		exerciseBurn,
+		loading: exerciseLoading,
+		adjustExerciseBurn,
+	} = useExerciseBurn();
 	const [pendingLog, setPendingLog] = useState(false);
 
 	useEffect(() => {
@@ -66,11 +76,12 @@ export default function AppPage() {
 		}
 	};
 
-	const loading = status === "loading" || userLoading || logsLoading;
+	const loading =
+		status === "loading" || userLoading || logsLoading || exerciseLoading;
 
 	const target = user?.dailyCalorieTarget ?? 2000;
 	const consumed = logs.reduce((sum, log) => sum + log.totalCalories, 0);
-	const remaining = target - consumed;
+	const remaining = target - consumed + exerciseBurn;
 
 	const totalProtein = logs.reduce((sum, log) => sum + log.totalProtein_g, 0);
 	const totalCarbs = logs.reduce((sum, log) => sum + log.totalCarbs_g, 0);
@@ -97,7 +108,7 @@ export default function AppPage() {
 					c="darkCharcoal.3"
 					style={{ letterSpacing: "-0.02em" }}
 				>
-					Braindead Eating
+					Brain Dead Eating
 				</Title>
 
 				{loading ? (
@@ -109,6 +120,11 @@ export default function AppPage() {
 				) : (
 					<>
 						<CalorieDisplay remaining={remaining} target={target} />
+
+						<ExerciseBurn
+							caloriesBurned={exerciseBurn}
+							onAdjust={adjustExerciseBurn}
+						/>
 
 						<div style={{ marginTop: "2rem" }}>
 							<FoodInput onSubmit={handleLogFood} />
