@@ -113,7 +113,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 			setUser(data);
 			userFetchedAt.current = Date.now();
 			if (!data.onboardingComplete) {
-				router.push("/onboarding");
+				router.push("/app/onboarding");
 			}
 		}
 		setUserLoading(false);

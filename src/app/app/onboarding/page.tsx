@@ -65,7 +65,7 @@ export default function OnboardingPage() {
 		});
 
 		await update();
-		window.location.href = "/";
+		window.location.href = "/app";
 	};
 
 	const skipAll = () => finishOnboarding({ deficitMode: DEFAULT_DEFICIT_MODE });

@@ -10,9 +10,9 @@ import {
 } from "react";
 
 const TAB_ORDER: Record<string, number> = {
-	"/": 0,
-	"/weight": 1,
-	"/profile": 2,
+	"/app": 0,
+	"/app/weight": 1,
+	"/app/profile": 2,
 };
 
 interface NavDirectionContextValue {

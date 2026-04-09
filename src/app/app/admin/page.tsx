@@ -37,7 +37,7 @@ export default function AdminPage() {
 
 	useEffect(() => {
 		if (!loading && user && user.subscriptionTier !== "admin") {
-			router.push("/profile");
+			router.push("/app/profile");
 		}
 	}, [loading, user, router]);
 
@@ -75,7 +75,7 @@ export default function AdminPage() {
 						<Title order={2}>Admin</Title>
 						<Button
 							component={Link}
-							href="/profile"
+							href="/app/profile"
 							variant="light"
 							color="sage"
 							size="sm"

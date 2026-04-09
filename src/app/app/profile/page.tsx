@@ -110,7 +110,7 @@ export default function ProfilePage() {
 						{user.subscriptionTier === "admin" && (
 							<Button
 								component={Link}
-								href="/admin"
+								href="/app/admin"
 								variant="light"
 								color="grape"
 								fullWidth
@@ -275,7 +275,7 @@ export default function ProfilePage() {
 							/>
 						</div>
 
-						<Anchor href="/history" c="dimmed">
+						<Anchor href="/app/history" c="dimmed">
 							Food history
 						</Anchor>
 

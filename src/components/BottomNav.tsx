@@ -24,26 +24,31 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
 	{
-		href: "/",
+		href: "/app",
 		label: "Eat",
 		icon: IconFlame,
 		activeIcon: IconFlameFilled,
 	},
 	{
-		href: "/weight",
+		href: "/app/weight",
 		label: "Weight",
 		icon: IconScale,
 		activeIcon: IconScale,
 	},
 	{
-		href: "/profile",
+		href: "/app/profile",
 		label: "Profile",
 		icon: IconUser,
 		activeIcon: IconUserFilled,
 	},
 ];
 
-const TAB_ROUTES = new Set(["/", "/weight", "/profile", "/history"]);
+const TAB_ROUTES = new Set([
+	"/app",
+	"/app/weight",
+	"/app/profile",
+	"/app/history",
+]);
 
 export function BottomNav() {
 	const pathname = usePathname();

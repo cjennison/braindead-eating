@@ -87,7 +87,7 @@ export default function SignInPage() {
 				signingInRef.current = false;
 			}
 		} else {
-			signIn("google", { callbackUrl: "/" });
+			signIn("google", { callbackUrl: "/app" });
 		}
 	};
 

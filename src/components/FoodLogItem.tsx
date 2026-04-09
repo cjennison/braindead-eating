@@ -298,7 +298,7 @@ export function FoodLogItem({ entry, onDelete, tier }: FoodLogItemProps) {
 						</Text>
 						<Button
 							component={Link}
-							href="/profile"
+							href="/app/profile"
 							color="teal"
 							fullWidth
 							maw={300}

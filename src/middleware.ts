@@ -1,12 +1,11 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/auth/signin", "/api/auth", "/_next", "/favicon.ico"];
-
 export function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
+	// Only protect /app routes — everything else is public
+	if (!pathname.startsWith("/app")) {
 		return NextResponse.next();
 	}
 
@@ -23,5 +22,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+	matcher: ["/app/:path*"],
 };

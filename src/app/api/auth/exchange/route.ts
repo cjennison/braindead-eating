@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 		? "__Secure-authjs.session-token"
 		: "authjs.session-token";
 
-	const response = NextResponse.redirect(new URL("/", request.url), {
+	const response = NextResponse.redirect(new URL("/app", request.url), {
 		status: 302,
 	});
 	response.cookies.set(cookieName, payload.s, {

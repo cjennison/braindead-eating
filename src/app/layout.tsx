@@ -9,10 +9,11 @@ import "@fontsource/geist-mono/600.css";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "./globals.css";
-import { ColorSchemeScript } from "@mantine/core";
+import { ColorSchemeScript, MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Providers } from "@/components/Providers";
+import { theme } from "@/theme";
 
 export const metadata: Metadata = {
 	title: "Brain Dead Eating",
@@ -36,7 +37,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 					margin: 0,
 				}}
 			>
-				<Providers>{children}</Providers>
+				<MantineProvider theme={theme} defaultColorScheme="dark">
+					<Notifications position="top-center" />
+					{children}
+				</MantineProvider>
 			</body>
 		</html>
 	);
