@@ -2,6 +2,7 @@
 
 import {
 	ActionIcon,
+	Badge,
 	Box,
 	Button,
 	Center,
@@ -11,6 +12,7 @@ import {
 	Paper,
 	Progress,
 	Stack,
+	Table,
 	Text,
 	Textarea,
 	Title,
@@ -165,8 +167,8 @@ function TypingDemo() {
 									paddingRight: "60px",
 									paddingTop: "14px",
 									paddingBottom: "14px",
-									backgroundColor: "#f8f9fa",
-									border: "none",
+									backgroundColor: "var(--mantine-color-gray-1)",
+									border: "1px solid var(--mantine-color-default-border)",
 									lineHeight: 1.4,
 								},
 							}}
@@ -411,7 +413,7 @@ export default function LandingPage() {
 						ta="center"
 						fw={500}
 						maw={400}
-						c="dark.7"
+						c="dimmed"
 						style={{ lineHeight: 1.4 }}
 					>
 						For the single brain cell you have left at the end of the day.
@@ -421,11 +423,11 @@ export default function LandingPage() {
 				<TypingDemo />
 
 				<Stack gap="xl" w="100%" maw={400} mt="xl" pb={120}>
-					<Paper p="xl" radius="xl" bg="gray.1">
-						<Title order={3} size="1.25rem" mb="sm" c="dark.9">
+					<Paper p="xl" radius="xl" withBorder>
+						<Title order={3} size="1.25rem" mb="sm">
 							Why are you working so hard on MyFitnessPal?
 						</Title>
-						<Text c="dark.6" size="1.1rem" lh={1.5}>
+						<Text c="dimmed" size="1.1rem" lh={1.5}>
 							Searching for "Banana Farms brand banana pudding special"? You
 							don't have time for that. Just tell it what you ate. It's that
 							simple. Let the AI do the math. <code>Banana pudding</code> -
@@ -433,101 +435,246 @@ export default function LandingPage() {
 						</Text>
 					</Paper>
 
-					<Paper p="xl" radius="xl" bg="gray.1">
-						<Title order={3} size="1.25rem" mb="sm" c="dark.9">
+					<Paper p="xl" radius="xl" withBorder>
+						<Title order={3} size="1.25rem" mb="sm">
 							Built for people
 						</Title>
-						<Text c="dark.6" size="1.1rem" lh={1.5}>
+						<Text c="dimmed" size="1.1rem" lh={1.5}>
 							You are people. It's designed specifically to be used with one
 							thumb while you're half-asleep on the couch. You literally don't
 							have to think.
 						</Text>
 					</Paper>
 
-					<Paper p="xl" radius="xl" bg="dark.9" c="white">
+					<Paper
+						p="xl"
+						radius="xl"
+						withBorder
+						bg="var(--mantine-primary-color-filled)"
+					>
 						<Title order={3} size="1.25rem" mb="sm" c="white">
 							Mostly Free. Slightly $1.
 						</Title>
-						<Text c="gray.4" size="1.1rem" lh={1.5}>
+						<Text c="white" size="1.1rem" lh={1.5} opacity={0.9}>
 							It's mostly free to use, but AI and servers aren't. Pitching in $1
 							a month helps me keep the lights on, covers my time, and ensures
 							you can keep putting absolutely zero effort into tracking your
 							food.
 						</Text>
 					</Paper>
+
+					<Title
+						order={2}
+						ta="center"
+						size="2rem"
+						mt="xl"
+						fw={900}
+						lts="-0.5px"
+					>
+						Us vs Them
+					</Title>
+
+					<Paper withBorder radius="xl" overflow="hidden" mt="sm">
+						<Table layout="fixed">
+							<Table.Thead bg="var(--mantine-color-gray-0)">
+								<Table.Tr>
+									<Table.Th p="md" w="50%">
+										<Badge color="sage" size="lg" variant="filled">
+											Brain Dead
+										</Badge>
+									</Table.Th>
+									<Table.Th p="md" w="50%">
+										<Badge color="gray" size="lg" variant="light">
+											The $20 Apps
+										</Badge>
+									</Table.Th>
+								</Table.Tr>
+							</Table.Thead>
+							<Table.Tbody>
+								<Table.Tr bg="var(--mantine-color-gray-0)">
+									<Table.Td colSpan={2} py="xs" px="md">
+										<Text
+											size="xs"
+											fw={800}
+											tt="uppercase"
+											lts="1px"
+											c="dimmed"
+										>
+											Tracking
+										</Text>
+									</Table.Td>
+								</Table.Tr>
+								<Table.Tr>
+									<Table.Td p="md" valign="top">
+										<Text size="1rem" fw={600} lh={1.4}>
+											Text what you ate. We do the math.
+										</Text>
+									</Table.Td>
+									<Table.Td p="md" valign="top">
+										<Text size="0.95rem" c="dimmed" lh={1.4}>
+											Search an uncurated database of 14,321 slightly different
+											variations of pizza brands.
+										</Text>
+									</Table.Td>
+								</Table.Tr>
+
+								<Table.Tr bg="var(--mantine-color-gray-0)">
+									<Table.Td colSpan={2} py="xs" px="md">
+										<Text
+											size="xs"
+											fw={800}
+											tt="uppercase"
+											lts="1px"
+											c="dimmed"
+										>
+											Goals & Targets
+										</Text>
+									</Table.Td>
+								</Table.Tr>
+								<Table.Tr>
+									<Table.Td p="md" valign="top">
+										<Text size="1rem" fw={600} lh={1.4}>
+											We stick to macros and calories. That's literally it.
+										</Text>
+									</Table.Td>
+									<Table.Td p="md" valign="top">
+										<Text size="0.95rem" c="dimmed" lh={1.4}>
+											25 different charts showing your sodium macro-cycle trend
+											over a 10-year baseline.
+										</Text>
+									</Table.Td>
+								</Table.Tr>
+
+								<Table.Tr bg="var(--mantine-color-gray-0)">
+									<Table.Td colSpan={2} py="xs" px="md">
+										<Text
+											size="xs"
+											fw={800}
+											tt="uppercase"
+											lts="1px"
+											c="dimmed"
+										>
+											Social Community
+										</Text>
+									</Table.Td>
+								</Table.Tr>
+								<Table.Tr>
+									<Table.Td p="md" valign="top">
+										<Text size="1rem" fw={600} lh={1.4}>
+											None. Use instagram or something.
+										</Text>
+									</Table.Td>
+									<Table.Td p="md" valign="top">
+										<Text size="0.95rem" c="dimmed" lh={1.4}>
+											A feed of strangers posting pictures of their sad chicken
+											breasts.
+										</Text>
+									</Table.Td>
+								</Table.Tr>
+
+								<Table.Tr bg="var(--mantine-color-gray-0)">
+									<Table.Td colSpan={2} py="xs" px="md">
+										<Text
+											size="xs"
+											fw={800}
+											tt="uppercase"
+											lts="1px"
+											c="dimmed"
+										>
+											Personal Trainers
+										</Text>
+									</Table.Td>
+								</Table.Tr>
+								<Table.Tr>
+									<Table.Td p="md" valign="top">
+										<Text size="1rem" fw={600} lh={1.4}>
+											We don't have them. Why do you need a trainer to type in
+											your lunch?
+										</Text>
+									</Table.Td>
+									<Table.Td p="md" valign="top">
+										<Text size="0.95rem" c="dimmed" lh={1.4}>
+											A $20/month tier where an AI pretends to be a fitness guru
+											named 'Todd'.
+										</Text>
+									</Table.Td>
+								</Table.Tr>
+							</Table.Tbody>
+						</Table>
+					</Paper>
 				</Stack>
 			</Stack>
-			checked && (
-			<Box
-				pos="fixed"
-				bottom={0}
-				left={0}
-				right={0}
-				p="md"
-				bg="white"
-				style={{
-					borderTop: "1px solid #eaeaea",
-					zIndex: 100,
-					boxShadow: "0 -4px 12px rgba(0,0,0,0.05)",
-				}}
-			>
-				<Center>
-					<Box pos="relative" w="100%" maw={480}>
-						<Box
-							pos="absolute"
-							right={24}
-							style={{
-								// Peak height is 40px above the bottom padding minus its native size padding, start fully hidden below the button
-								bottom: `calc(-120px + ${scrollProgress * 200}px)`,
-								width: "120px",
-								height: "120px",
-								zIndex: -1,
-								transition: "bottom 0.1s ease-out, transform 0.2s",
-								transform: `rotate(${scrollProgress * 10 - 5}deg)`,
-								pointerEvents: "none",
-							}}
-						>
-							{/* Using an img tag assuming the file is in public/orangecat.png */}
-							<img
-								src="/orangecat.png"
-								alt="Sneaky orange cat"
+			{checked && (
+				<Box
+					pos="fixed"
+					bottom={0}
+					left={0}
+					right={0}
+					p="md"
+					bg="var(--mantine-color-body)"
+					style={{
+						borderTop: "1px solid var(--mantine-color-default-border)",
+						zIndex: 100,
+						boxShadow: "0 -4px 12px rgba(0,0,0,0.05)",
+					}}
+				>
+					<Center>
+						<Box pos="relative" w="100%" maw={480}>
+							<Box
+								pos="absolute"
+								right={24}
 								style={{
-									width: "100%",
-									height: "100%",
-									objectFit: "contain",
+									// Peak height is 40px above the bottom padding minus its native size padding, start fully hidden below the button
+									bottom: `calc(-120px + ${scrollProgress * 200}px)`,
+									width: "120px",
+									height: "120px",
+									zIndex: -1,
+									transition: "bottom 0.1s ease-out, transform 0.2s",
+									transform: `rotate(${scrollProgress * 10 - 5}deg)`,
+									pointerEvents: "none",
 								}}
-							/>
-						</Box>
+							>
+								{/* Using an img tag assuming the file is in public/orangecat.png */}
+								<img
+									src="/orangecat.png"
+									alt="Sneaky orange cat"
+									style={{
+										width: "100%",
+										height: "100%",
+										objectFit: "contain",
+									}}
+								/>
+							</Box>
 
-						<Stack w="100%" pb="xs">
-							{hasSession ? (
-								<Button
-									component={Link}
-									href="/app"
-									size="xl"
-									radius="xl"
-									fullWidth
-									style={{ position: "relative", zIndex: 2 }}
-								>
-									Open App
-								</Button>
-							) : (
-								<Button
-									component={Link}
-									href="/auth/signin"
-									size="xl"
-									radius="xl"
-									fullWidth
-									style={{ position: "relative", zIndex: 2 }}
-								>
-									Start Tracking
-								</Button>
-							)}
-						</Stack>
-					</Box>
-				</Center>
-			</Box>
-			);
+							<Stack w="100%" pb="xs">
+								{hasSession ? (
+									<Button
+										component={Link}
+										href="/app"
+										size="xl"
+										radius="xl"
+										fullWidth
+										style={{ position: "relative", zIndex: 2 }}
+									>
+										Open App
+									</Button>
+								) : (
+									<Button
+										component={Link}
+										href="/auth/signin"
+										size="xl"
+										radius="xl"
+										fullWidth
+										style={{ position: "relative", zIndex: 2 }}
+									>
+										Start Tracking
+									</Button>
+								)}
+							</Stack>
+						</Box>
+					</Center>
+				</Box>
+			)}
 		</Container>
 	);
 }

@@ -30,14 +30,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
-				<ColorSchemeScript defaultColorScheme="dark" />
+				<ColorSchemeScript defaultColorScheme="light" />
 			</head>
 			<body
 				style={{
 					margin: 0,
 				}}
 			>
-				<MantineProvider theme={theme} defaultColorScheme="dark">
+				<MantineProvider theme={theme} defaultColorScheme="light">
 					<Notifications position="top-center" />
 					{children}
 				</MantineProvider>
