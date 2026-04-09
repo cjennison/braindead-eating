@@ -96,22 +96,28 @@ export default function SignInPage() {
 			<Container size={480} py="xl">
 				<Center mih="80vh">
 					<Stack align="center" gap="xl">
-						<Title order={1} ta="center" size="2.5rem">
-							Brain Dead Eating
-						</Title>
-						<Text c="dimmed" size="xl" ta="center">
-							It's Brain Dead.
-						</Text>
+						<Stack align="center" gap="xs">
+							<Title order={1} ta="center" size="2rem" fw={800}>
+								Brain Dead Eating
+							</Title>
+							<Text c="dimmed" size="lg" ta="center">
+								Sign in or create an account
+							</Text>
+						</Stack>
 						{ready ? (
-							<Button
-								size="xl"
-								onClick={handleSignIn}
-								fullWidth
-								maw={320}
-								loading={signingIn}
-							>
-								Sign in with Google
-							</Button>
+							<Stack align="center" gap="sm" w="100%" maw={320}>
+								<Button
+									size="xl"
+									onClick={handleSignIn}
+									fullWidth
+									loading={signingIn}
+								>
+									Continue with Google
+								</Button>
+								<Text c="dimmed" size="sm" ta="center">
+									New here? This creates your account automatically.
+								</Text>
+							</Stack>
 						) : (
 							<Stack align="center" gap="sm" w="100%" maw={320}>
 								<Skeleton height={52} radius="md" w="100%" />
