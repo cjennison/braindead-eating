@@ -61,7 +61,7 @@ const darkCharcoal: MantineColorsTuple = [
 ];
 
 export const theme: MantineThemeOverride = createTheme({
-	primaryColor: "sage",
+	primaryColor: "dark",
 	colors: {
 		sage,
 		coral,
