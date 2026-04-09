@@ -341,6 +341,10 @@ function TypingDemo() {
 					</Stack>
 				</Stack>
 			</Paper>
+
+			<Text c="dimmed" size="sm" ta="center" fs="italic">
+				Oh, and you can track weight too.
+			</Text>
 		</Stack>
 	);
 }
@@ -422,7 +426,7 @@ export default function LandingPage() {
 
 				<TypingDemo />
 
-				<Stack gap="xl" w="100%" maw={400} mt="xl" pb={120}>
+				<Stack gap="xl" w="100%" maw={400} mt="xl" pb={240}>
 					<Paper p="xl" radius="xl" withBorder>
 						<Title order={3} size="1.25rem" mb="sm">
 							Why are you working so hard on MyFitnessPal?
@@ -602,8 +606,29 @@ export default function LandingPage() {
 							</Table.Tbody>
 						</Table>
 					</Paper>
+
+					<Stack align="center" gap={4}>
+						<Text size="xs" c="dimmed">
+							Made with <span aria-label="love">❤️</span> in New Hampshire
+						</Text>
+						<Text size="xs" c="dimmed">
+							by{" "}
+							<Text
+								component="a"
+								href="http://chrisjennison.dev"
+								target="_blank"
+								rel="noopener noreferrer"
+								size="xs"
+								c="dimmed"
+								td="underline"
+							>
+								Chris Jennison
+							</Text>
+						</Text>
+					</Stack>
 				</Stack>
 			</Stack>
+
 			{checked && (
 				<Box
 					pos="fixed"
