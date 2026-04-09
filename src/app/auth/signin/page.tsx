@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	Anchor,
 	Button,
 	Center,
 	Container,
@@ -117,6 +118,15 @@ export default function SignInPage() {
 								<Text c="dimmed" size="sm" ta="center">
 									New here? This creates your account automatically.
 								</Text>
+								<Anchor
+									href="/privacy"
+									c="dimmed"
+									size="xs"
+									ta="center"
+									mt="xs"
+								>
+									Privacy Policy
+								</Anchor>
 							</Stack>
 						) : (
 							<Stack align="center" gap="sm" w="100%" maw={320}>

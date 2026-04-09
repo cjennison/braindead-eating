@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db";
 import { AiUsage } from "@/lib/models/AiUsage";
 import { ExerciseLog } from "@/lib/models/ExerciseLog";
 import { FoodLog } from "@/lib/models/FoodLog";
+import { PromoCode } from "@/lib/models/PromoCode";
 import { User } from "@/lib/models/User";
 import { WeightLog } from "@/lib/models/WeightLog";
 import type { WeightUnit } from "@/types";
@@ -157,6 +158,10 @@ export async function DELETE() {
 		WeightLog.deleteMany({ userId }),
 		AiUsage.deleteMany({ userId }),
 		ExerciseLog.deleteMany({ userId }),
+		PromoCode.updateMany(
+			{ redeemedBy: userId },
+			{ $pull: { redeemedBy: userId } },
+		),
 	]);
 
 	return NextResponse.json({ success: true });

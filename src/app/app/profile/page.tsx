@@ -280,6 +280,16 @@ export default function ProfilePage() {
 						</Anchor>
 
 						<Button
+							variant="light"
+							color="teal"
+							component="a"
+							href="/api/user/data"
+							download="braindead-eating-data.json"
+						>
+							Download my data
+						</Button>
+
+						<Button
 							variant="subtle"
 							color="gray"
 							onClick={() => signOut({ callbackUrl: "/auth/signin" })}
@@ -316,6 +326,10 @@ export default function ProfilePage() {
 								</Group>
 							</Card>
 						)}
+
+						<Anchor href="/privacy" c="dimmed" size="xs" ta="center">
+							Privacy Policy
+						</Anchor>
 					</Stack>
 				)}
 			</Container>

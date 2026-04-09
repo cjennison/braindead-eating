@@ -2,6 +2,7 @@
 
 import {
 	ActionIcon,
+	Anchor,
 	Badge,
 	Box,
 	Button,
@@ -616,6 +617,26 @@ export default function LandingPage() {
 							</Table.Tbody>
 						</Table>
 					</Paper>
+
+					<Stack
+						gap={4}
+						mt="xl"
+						mb="md"
+						align="center"
+						style={{ opacity: 0.5 }}
+					>
+						<Text size="xs" c="dimmed" fw={600}>
+							Legal
+						</Text>
+						<Group gap="sm" justify="center">
+							<Anchor href="/privacy" size="xs" c="dimmed">
+								Privacy Policy
+							</Anchor>
+							<Anchor href="/terms" size="xs" c="dimmed">
+								Terms and Conditions
+							</Anchor>
+						</Group>
+					</Stack>
 
 					<Stack align="center" gap={4}>
 						<Text size="xs" c="dimmed">
